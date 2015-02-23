@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" >
+
+	<PropertyGroup>
+		<ConfigurationDir>$(MSBuildProjectDirectory)\poco2swift</ConfigurationDir>
+		<ConfigurationXsdFile>$(ConfigurationDir)\Configuration.xsd</ConfigurationXsdFile>
+		<ConfigurationCsFile>$(ConfigurationDir)\Configuration.cs</ConfigurationCsFile>
+	</PropertyGroup>
+	
+	<Target Name="xsd" 
+			Inputs="$(ConfigurationXsdFile);$(MSBuildProjectFile)" 
+			Outputs="$(ConfigurationCsFile)">
+		<Exec Command="xsd.exe &quot;$(ConfigurationXsdFile)&quot; /classes /nologo /n:poco2swift &quot;/out:$(ConfigurationDir)&quot;"/>
+	</Target>
+	
+</Project>

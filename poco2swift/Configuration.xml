@@ -1,0 +1,176 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<poco2swift xmlns="http://paullalonde.ca/schemas/pod2swift/Configuration.xsd" 
+			   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+			   xsi:schemaLocation="http://paullalonde.ca/schemas/pod2swift/Configuration.xsd Configuration.xsd" >
+
+	<imports>
+		<module name="Foundation"/>
+	</imports>
+
+	<skip-types>
+		<skip-type match="^SoftInfo\.Dme\.Model\.Search\.Drug\.Serialization\.Fav.+"/>
+	</skip-types>
+
+	<external-types>
+		<external-type full-name="System.DateTime, mscorlib" swift-name="NSDate"/>
+		<external-type full-name="System.DateTimeOffset, mscorlib" swift-name="NSDate"/>
+		<external-type full-name="System.Decimal, mscorlib" swift-name="NSDecimalNumber"/>
+		<external-type full-name="System.Guid, mscorlib" swift-name="NSUUID"/>
+		<external-type full-name="System.TimeSpan, mscorlib" swift-name="NSTimeInterval"/>
+		<external-type full-name="System.Uri, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" swift-name="NSURL"/>
+		<external-type full-name="System.Version, mscorlib" swift-name="String"/>
+
+		<external-type full-name="SoftInfo.Dme.Model.Clinical.ClinicalElement, SoftInfo.Dme.Model" swift-name="Bool"/>
+		<external-type full-name="SoftInfo.Dme.Model.Clinical.HistoricalElement, SoftInfo.Dme.Model" swift-name="Bool"/>
+		<external-type full-name="SoftInfo.Dme.Model.HealthcareProviders.Pharmacy, SoftInfo.Dme.Model" swift-name="Bool"/>
+		<external-type full-name="SoftInfo.Dme.Model.HealthcareProviders.Physician, SoftInfo.Dme.Model" swift-name="Bool"/>
+		<external-type full-name="SoftInfo.Dme.Model.HealthcareProviders.ServicePointPhysician, SoftInfo.Dme.Model" swift-name="Bool"/>
+		<external-type full-name="SoftInfo.Dme.Model.PatientIndex.Patient, SoftInfo.Dme.Model" swift-name="Bool"/>
+		<external-type full-name="SoftInfo.Dme.Model.Ramq.RamqRegistration, SoftInfo.Dme.Model" swift-name="Bool"/>
+		<external-type full-name="SoftInfo.Dme.Model.Security.FullRole, SoftInfo.Dme.Model" swift-name="Bool"/>
+		<external-type full-name="SoftInfo.Dme.Model.Security.User, SoftInfo.Dme.Model" swift-name="Bool"/>
+	</external-types>
+	
+	<enumerations>
+		<enum name="ScalarAttributeType">
+			<value name="Unknown" swift-name="UnknownType"/>
+			<value name="String" swift-name="StringType"/>
+			<value name="Int32" swift-name="Int32Type"/>
+			<value name="DateTime" swift-name="DateTimeType"/>
+			<value name="LicensingBody" swift-name="LicensingBodyType"/>
+			<value name="PersonGender" swift-name="PersonGenderType"/>
+			<value name="Province" swift-name="ProvinceType"/>
+		</enum>
+		
+		<!--<enum name="AbnormalFlagNature" fullname="SoftInfo.Dme.Model.Clinical.AbnormalFlagNature, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ActUncertainty" fullname="SoftInfo.Dme.Model.Clinical.ActUncertainty, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ActPriority" fullname="SoftInfo.Dme.Model.Clinical.ActPriority, SoftInfo.Dme.Model" include="true"/>
+		<enum name="AddressClass" fullname="SoftInfo.Dme.Model.Contacts.AddressClass, SoftInfo.Dme.Model" include="true"/>
+		<enum name="AdministrativeContactRoleType" fullname="SoftInfo.Dme.Model.Contacts.AdministrativeContactRoleType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="AppointmentState" fullname="SoftInfo.Dme.Model.Appointments.AppointmentState, SoftInfo.Dme.Model" include="true"/>
+		<enum name="BasicAddressPartType" fullname="SoftInfo.Dme.Model.Contacts.BasicAddressPartType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="BasicPersonNamePartQualifier" fullname="SoftInfo.Dme.Model.Contacts.BasicPersonNamePartQualifier, SoftInfo.Dme.Model" include="true"/>
+		<enum name="BasicPersonNamePartType" fullname="SoftInfo.Dme.Model.Contacts.BasicPersonNamePartType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="BasicPersonNameUse" fullname="SoftInfo.Dme.Model.Contacts.BasicPersonNameUse, SoftInfo.Dme.Model" include="true"/>
+		<enum name="BasicPostalAddressUse" fullname="SoftInfo.Dme.Model.Contacts.BasicPostalAddressUse, SoftInfo.Dme.Model" include="true"/>
+		<enum name="BasicTelecommunicationAddressUse" fullname="SoftInfo.Dme.Model.Contacts.BasicTelecommunicationAddressUse, SoftInfo.Dme.Model" include="true"/>
+		<enum name="BillableActCodeSystem" fullname="SoftInfo.Dme.Model.Reference.BillableActCodeSystem, SoftInfo.Dme.Model" include="true"/>
+		<enum name="CareElementComparisonOperator" fullname="SoftInfo.Dme.Model.Care.CareElementComparisonOperator, SoftInfo.Dme.Model" include="true"/>
+		<enum name="CareElementDataType" fullname="SoftInfo.Dme.Model.Care.CareElementDataType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="CareElementLocation" fullname="SoftInfo.Dme.Model.Care.CareElementLocation, SoftInfo.Dme.Model" include="true"/>
+		<enum name="CareValueStatus" fullname="SoftInfo.Dme.Model.Care.CareValueStatus, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ClinicalDrug" fullname="SoftInfo.Dme.Model.Drug.ClinicalDrug, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ClinicalElementType" fullname="SoftInfo.Dme.Model.Clinical.ClinicalElementType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="Country" fullname="SoftInfo.Dme.Model.Contacts.Country, SoftInfo.Dme.Model" include="true"/>
+		<enum name="DiagnosticCodeSystemIdentifier" fullname="SoftInfo.Dme.Model.Reference.DiagnosticCodeSystemIdentifier, SoftInfo.Dme.Model" include="true"/>
+		<enum name="DosageFrequency" fullname="SoftInfo.Dme.Model.Drug.DosageFrequency, SoftInfo.Dme.Model" include="true"/>
+		<enum name="DrugUnitOfMeasure" fullname="SoftInfo.Dme.Model.Drug.DrugUnitOfMeasure, SoftInfo.Dme.Model" include="true"/>
+		<enum name="EmailClass" fullname="SoftInfo.Dme.Model.Contacts.EmailClass, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ExposureElementDataType" fullname="SoftInfo.Dme.Model.Care.ExposureElementDataType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="FamilyRelation" fullname="SoftInfo.Dme.Model.Clinical.FamilyRelation, SoftInfo.Dme.Model" include="true"/>
+		<enum name="IdentifiedLocationScope" fullname="SoftInfo.Dme.Model.HealthcareProviders.IdentifiedLocationScope, SoftInfo.Dme.Model" include="true"/>
+		<enum name="IntoleranceValue" fullname="SoftInfo.Dme.Model.Clinical.IntoleranceValue, SoftInfo.Dme.Model" include="true"/>
+		<enum name="LabReportStatusCode" fullname="SoftInfo.Dme.Model.Clinical.LabReportStatusCode, SoftInfo.Dme.Model" include="true"/>
+		<enum name="LabResultObservationValueType" fullname="SoftInfo.Dme.Model.Clinical.LabResultObservationValueType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="LabResultProcessStepCode" fullname="SoftInfo.Dme.Model.Clinical.LabResultProcessStepCode, SoftInfo.Dme.Model" include="true"/>
+		<enum name="LicensingBody" fullname="SoftInfo.Dme.Model.HealthcareProviders.LicensingBody, SoftInfo.Dme.Model" include="true"/>
+		<enum name="LifeStage" fullname="SoftInfo.Dme.Model.Clinical.LifeStage, SoftInfo.Dme.Model" include="true"/>
+		<enum name="LoincScaleType" fullname="SoftInfo.Dme.Model.Reference.LoincScaleType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="MedicalSpecialtyCodeSystem" fullname="SoftInfo.Dme.Model.Reference.MedicalSpecialtyCodeSystem, SoftInfo.Dme.Model" include="true"/>
+		<enum name="NoteTemplateItemType" fullname="SoftInfo.Dme.Model.Customization.NoteTemplateItemType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ObservationInterpretation" fullname="SoftInfo.Dme.Model.Clinical.ObservationInterpretation, SoftInfo.Dme.Model" include="true"/>
+		<enum name="PatientRelation" fullname="SoftInfo.Dme.Model.PatientIndex.PatientRelation, SoftInfo.Dme.Model" include="true"/>
+		<enum name="PatientStatusInClinic" fullname="SoftInfo.Dme.Model.PatientIndex.PatientStatusInClinic, SoftInfo.Dme.Model" include="true"/>
+		<enum name="PersonalHistoryType" fullname="SoftInfo.Dme.Model.Clinical.PersonalHistoryType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="PersonGender" fullname="SoftInfo.Dme.Model.Contacts.PersonGender, SoftInfo.Dme.Model" include="true"/>
+		<enum name="PersonStatus" fullname="SoftInfo.Dme.Model.Contacts.PersonStatus, SoftInfo.Dme.Model" include="true"/>
+		<enum name="PhoneOrEmailURLScheme" fullname="SoftInfo.Dme.Model.Contacts.PhoneOrEmailURLScheme, SoftInfo.Dme.Model" include="true"/>
+		<enum name="PresentationStyle" fullname="SoftInfo.Dme.Model.Customization.PresentationStyle, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ProviderRoleIdentifierDomain" fullname="SoftInfo.Dme.Model.HealthcareProviders.ProviderRoleIdentifierDomain, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ProviderRoleIntervenant" fullname="SoftInfo.Dme.Model.HealthcareProviders.ProviderRoleIntervenant, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ProviderRoleStatus" fullname="SoftInfo.Dme.Model.HealthcareProviders.ProviderRoleStatus, SoftInfo.Dme.Model" include="true"/>
+		<enum name="Province" fullname="SoftInfo.Dme.Model.Contacts.Province, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ReportDeliveryMechanism" fullname="SoftInfo.Dme.Model.HealthcareProviders.ReportDeliveryMechanism, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ReportFormat" fullname="SoftInfo.Dme.Model.Clinical.ReportFormat, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ReportMedia" fullname="SoftInfo.Dme.Model.Clinical.ReportMedia, SoftInfo.Dme.Model" include="true"/>
+		<enum name="Resolution" fullname="SoftInfo.Dme.Model.Tasks.Resolution, SoftInfo.Dme.Model" include="true"/>
+		<enum name="RiskFactorCodeSystemIdentifier" fullname="SoftInfo.Dme.Model.Reference.RiskFactorCodeSystemIdentifier, SoftInfo.Dme.Model" include="true"/>
+		<enum name="SegmentType" fullname="SoftInfo.Dme.Model.Appointments.SegmentType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ServiceDeliveryLocationPlaceType" fullname="SoftInfo.Dme.Model.HealthcareProviders.ServiceDeliveryLocationPlaceType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ServiceDeliveryLocationRoleType" fullname="SoftInfo.Dme.Model.HealthcareProviders.ServiceDeliveryLocationRoleType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="ServiceDeliveryRoleStatus" fullname="SoftInfo.Dme.Model.HealthcareProviders.ServiceDeliveryRoleStatus, SoftInfo.Dme.Model" include="true"/>
+		<enum name="SeverityObservation" fullname="SoftInfo.Dme.Model.Clinical.SeverityObservation, SoftInfo.Dme.Model" include="true"/>
+		<enum name="TaskType" fullname="SoftInfo.Dme.Model.Tasks.TaskType, SoftInfo.Dme.Model" include="true"/>
+		<enum name="TelephoneClass" fullname="SoftInfo.Dme.Model.Contacts.TelephoneClass, SoftInfo.Dme.Model" include="true"/>
+		<enum name="TextValueTemplate" fullname="SoftInfo.Dme.Model.Clinical.TextValueTemplate, SoftInfo.Dme.Model" include="true"/>
+		<enum name="TimeUnitOfMeasure" fullname="SoftInfo.Dme.Model.Clinical.TimeUnitOfMeasure, SoftInfo.Dme.Model" include="true"/>
+		<enum name="VitalSignGroupDefinition" fullname="SoftInfo.Dme.Model.Clinical.VitalSignGroupDefinition, SoftInfo.Dme.Model" include="true"/>-->
+
+		<!--<enum name="NullableWrapper" fullname="SoftInfo.Dme.ServicesDme.Common.Model.Helpers.NullableWrapper`1, SoftInfo.Dme.ServicesDme.Common.Model" include="true"/>-->
+	</enumerations>
+	
+	<classes>
+		<class name="DmeActivityTask">
+			<property name="TaskType" swift-name="Type"/>
+		</class>
+		<class name="DmeAddress">
+			<property name="AddressClass" swift-name="Class"/>
+			<property name="Province" swift-name="AddressProvince"/>
+			<property name="Country" swift-name="AddressCountry"/>
+		</class>
+		<class name="DmeAppointmentState">
+			<property name="AppointmentState" swift-name="State"/>
+		</class>
+		<class name="DmeCalculatedDosage">
+			<property name="DosageFrequency" swift-name="Frequency"/>
+		</class>
+		<class name="DmeClinicalElementTask">
+			<property name="TaskType" swift-name="Type"/>
+		</class>
+		<class name="DmeDateOrLifeStage">
+			<property name="LifeStage" swift-name="Stage"/>
+		</class>
+		<class name="DmeEmail">
+			<property name="EmailClass" swift-name="Class"/>
+		</class>
+		<class name="DmeEncounterSummary">
+			<property name="PatientStatusInClinic" swift-name="Status"/>
+		</class>
+		<class name="DmeHealthCard">
+			<property name="Province" swift-name="IssuedBy"/>
+		</class>
+		<class name="DmeLicense">
+			<property name="LicensingBody" swift-name="IssuedBy"/>
+		</class>
+		<class name="DmeRegistrationChange">
+			<property name="RegistrationAttribute" swift-name="Attribute"/>
+		</class>
+		<class name="DmeRelatedTask">
+			<property name="Resolution" swift-name="TaskResolution"/>
+		</class>
+		<class name="DmeScheduleSegment">
+			<property name="SegmentType" swift-name="Type"/>
+		</class>
+		<class name="DmeTask">
+			<property name="LabReportStatusCode" swift-name="ReportStatus"/>
+			<property name="Resolution" swift-name="TaskResolution"/>
+			<property name="TaskType" swift-name="Type"/>
+		</class>
+		<class name="DmeTaskPartition">
+			<property name="TaskType" swift-name="Type"/>
+		</class>
+		<class name="DmeTaskSummary">
+			<property name="LabReportStatusCode" swift-name="ReportStatus"/>
+			<property name="Resolution" swift-name="TaskResolution"/>
+			<property name="TaskType" swift-name="Type"/>
+		</class>
+		<class name="DsqSettings">
+			<property name="DsqEnvironment" swift-name="Environment"/>
+		</class>
+
+		<class name="DmeFormInk" full-name="SoftInfo.Dme.ServicesDme.Common.Model.Clinical.DmeFormInk, SoftInfo.Dme.ServicesDme.Common.Model" include="true"/>
+		<class name="DmeBillableAct" full-name="SoftInfo.Dme.ServicesDme.Common.Model.Reference.DmeBillableAct, SoftInfo.Dme.ServicesDme.Common.Model" include="true"/>
+		<class name="DmeAdministrationSite" full-name="SoftInfo.Dme.ServicesDme.Common.Model.Drug.DmeAdministrationSite, SoftInfo.Dme.ServicesDme.Common.Model" include="true"/>
+	</classes>
+	
+</poco2swift>
