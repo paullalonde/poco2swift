@@ -3,7 +3,7 @@ using System.IO;
 
 namespace poco2swift.SwiftTypes
 {
-	class SwiftArray : SwiftType
+	public class SwiftArray : SwiftType
 	{
 		public SwiftArray(SwiftType elementType)
 		{

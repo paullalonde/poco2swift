@@ -4,7 +4,7 @@ using System.Text;
 
 namespace poco2swift.SwiftTypes
 {
-	class SwiftDictionary : SwiftType
+	public class SwiftDictionary : SwiftType
 	{
 		public SwiftDictionary(SwiftType keyType, SwiftType valueType)
 		{

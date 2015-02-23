@@ -3,7 +3,7 @@ using System.IO;
 
 namespace poco2swift.SwiftTypes
 {
-	class SwiftOptional : SwiftType
+	public class SwiftOptional : SwiftType
 	{
 		public SwiftOptional(SwiftType innerType, bool implicitlyUnwrapped = false)
 		{

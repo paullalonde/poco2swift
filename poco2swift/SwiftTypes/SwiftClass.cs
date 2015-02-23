@@ -4,7 +4,7 @@ using System.IO;
 
 namespace poco2swift.SwiftTypes
 {
-	class SwiftClass : SwiftComposite
+	public class SwiftClass : SwiftComposite
 	{
 		public SwiftClass(string name)
 			: base(name)
@@ -13,12 +13,31 @@ namespace poco2swift.SwiftTypes
 
 		#region Properties
 
+		public IEnumerable<SwiftProperty> Properties
+		{
+			get { return _orderedProperties; }
+		}
+
+		public bool ContainsProperty(string name)
+		{
+			if (String.IsNullOrEmpty(name))
+				throw new ArgumentNullException("name");
+
+			return _properties.ContainsKey(name);
+		}
+
 		public void AddProperty(SwiftProperty property)
 		{
 			if (property == null)
 				throw new ArgumentNullException("property");
 
-			_properties.Add(property);
+			var name = property.Name;
+
+			if (_properties.ContainsKey(name))
+				throw new ArgumentException(String.Format("Duplicate property : {0}.", name));
+
+			_properties.Add(name, property);
+			_orderedProperties.Add(property);
 		}
 
 		#endregion
@@ -31,7 +50,7 @@ namespace poco2swift.SwiftTypes
 		{
 			var firstTime = true;
 
-			foreach (var property in _properties)
+			foreach (var property in _orderedProperties)
 			{
 				if (!firstTime)
 					writer.WriteLine("\t");
@@ -44,6 +63,7 @@ namespace poco2swift.SwiftTypes
 
 		#endregion
 
-		private IList<SwiftProperty> _properties = new List<SwiftProperty>();
+		private IDictionary<string, SwiftProperty> _properties = new Dictionary<string, SwiftProperty>();
+		private IList<SwiftProperty> _orderedProperties = new List<SwiftProperty>();
 	}
 }

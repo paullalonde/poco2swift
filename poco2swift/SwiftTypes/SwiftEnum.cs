@@ -4,7 +4,7 @@ using System.IO;
 
 namespace poco2swift.SwiftTypes
 {
-	class SwiftEnum : SwiftComposite
+	public class SwiftEnum : SwiftComposite
 	{
 		public SwiftEnum(string name)
 			: base(name)

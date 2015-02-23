@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace poco2swift
 {
-	interface ITypeFilter
+	public interface ITypeFilter
 	{
 		bool IsGoodType(Type type);
 		string GetTypeName(Type type);

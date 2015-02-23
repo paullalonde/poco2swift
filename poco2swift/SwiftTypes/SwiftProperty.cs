@@ -3,7 +3,7 @@ using System.IO;
 
 namespace poco2swift.SwiftTypes
 {
-	class SwiftProperty
+	public class SwiftProperty
 	{
 		public SwiftProperty(string name, SwiftType type, bool isConstant = false)
 		{
@@ -13,11 +13,13 @@ namespace poco2swift.SwiftTypes
 			if (type == null)
 				throw new ArgumentNullException("type");
 
-			_name = name;
+			this.Name = name;
+
 			_type = type;
 			_isConstant = isConstant;
 		}
 
+		public string Name { get; private set; }
 		public string BriefComment { get; set; }
 
 		public void WriteDeclaration(TextWriter writer)
@@ -26,12 +28,11 @@ namespace poco2swift.SwiftTypes
 				throw new ArgumentNullException("writer");
 
 			SwiftComposite.WriteComment(1, writer, this.BriefComment);
-			writer.Write("\t{0} {1}: ", _isConstant ? "let" : "var", _name);
+			writer.Write("\t{0} {1}: ", _isConstant ? "let" : "var", this.Name);
 			_type.Write(writer);
 			writer.WriteLine();
 		}
 
-		private string _name;
 		private SwiftType _type;
 		private bool _isConstant;
 	}

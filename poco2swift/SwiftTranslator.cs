@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using poco2swift.SwiftTypes;
 
 namespace poco2swift
 {
-	class SwiftTranslator
+	public class SwiftTranslator
 	{
 		public SwiftTranslator(Poco2SwiftType configuration, ITypeFilter filter, DocumentationCache documentation)
 		{
@@ -64,11 +62,12 @@ namespace poco2swift
 			if (_swiftTypes.TryGetValue(type, out swiftType))
 				return swiftType;
 
-			if (type.IsGenericParameter)
-			{
-				swiftType = TranslateGenericParameter(type);
-			}
-			else if (type.IsArray)
+			//if (type.IsGenericParameter)
+			//{
+			//	swiftType = TranslateGenericParameter(type);
+			//}
+			//else 
+			if (type.IsArray)
 			{
 				swiftType = TranslateArray(type);
 			}
@@ -92,14 +91,14 @@ namespace poco2swift
 			return swiftType;
 		}
 
-		private SwiftType TranslateGenericParameter(Type parameterType)
-		{
-			var swiftType = new SwiftPlaceholder(parameterType.Name);
+		//private SwiftType TranslateGenericParameter(Type parameterType)
+		//{
+		//	var swiftType = new SwiftPlaceholder(parameterType.Name);
 
-			_swiftTypes.Add(parameterType, swiftType);
+		//	_swiftTypes.Add(parameterType, swiftType);
 
-			return swiftType;
-		}
+		//	return swiftType;
+		//}
 
 		private SwiftType TranslateArray(Type arrayType)
 		{
@@ -121,6 +120,11 @@ namespace poco2swift
 		{
 			return TranslateWellKnownType(classType);
 		}
+
+		//private SwiftType TranslateClassDefinition(Type classType)
+		//{
+
+		//}
 
 		private SwiftType TranslateClass(Type classType, bool forDefinition)
 		{
@@ -190,7 +194,7 @@ namespace poco2swift
 						continue;
 					}
 
-					swiftClass.AddTypeParameter(typeArg.Name, swiftTypeArg);
+					//swiftClass.AddTypeParameter(typeArg.Name, swiftTypeArg);
 				}
 			}
 

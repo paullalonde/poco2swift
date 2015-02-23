@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace poco2swift
 {
-	class DocumentationCache
+	public class DocumentationCache
 	{
 		public string GetTypeSummary(Type type)
 		{

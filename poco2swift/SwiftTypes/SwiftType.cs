@@ -4,10 +4,9 @@ using System.Text;
 
 namespace poco2swift.SwiftTypes
 {
-	abstract class SwiftType
+	public abstract class SwiftType
 	{
 		public virtual bool IsOptional { get { return false; } }
-		public virtual bool IsValueType { get { return false; } }
 
 		public abstract void Write(TextWriter writer);
 

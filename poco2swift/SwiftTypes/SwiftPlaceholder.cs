@@ -3,7 +3,7 @@ using System.IO;
 
 namespace poco2swift.SwiftTypes
 {
-	class SwiftPlaceholder : IEquatable<SwiftPlaceholder>, IComparable<SwiftPlaceholder>
+	public class SwiftPlaceholder : SwiftType, IEquatable<SwiftPlaceholder>, IComparable<SwiftPlaceholder>
 	{
 		public SwiftPlaceholder(string name)
 		{
@@ -14,6 +14,18 @@ namespace poco2swift.SwiftTypes
 		}
 
 		public string Name { get; private set; }
+
+		#region SwiftType overrides
+
+		public override void Write(TextWriter writer)
+		{
+			if (writer == null)
+				throw new ArgumentNullException("writer");
+
+			writer.Write(this.Name);
+		}
+
+		#endregion
 
 		#region Object overrides
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace poco2swift.SwiftTypes
 {
-	class SwiftEnumValue
+	public class SwiftEnumValue
 	{
 		public SwiftEnumValue(string name, object value)
 		{

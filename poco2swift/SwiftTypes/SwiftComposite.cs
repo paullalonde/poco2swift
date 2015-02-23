@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace poco2swift.SwiftTypes
 {
-	abstract class SwiftComposite : SwiftType
+	public abstract class SwiftComposite : SwiftType
 	{
 		public SwiftComposite(string name)
 		{
@@ -65,7 +65,15 @@ namespace poco2swift.SwiftTypes
 
 		public IEnumerable<SwiftPlaceholder> TypeParameters
 		{
-			get { return _typeParameters; }
+			get { return _orderedParameters; }
+		}
+
+		public bool ContainsTypeParameter(SwiftPlaceholder parameter)
+		{
+			if (parameter == null)
+				throw new ArgumentNullException("parameter");
+
+			return _parameters.Contains(parameter);
 		}
 
 		public void AddTypeParameter(SwiftPlaceholder parameter)
@@ -73,7 +81,38 @@ namespace poco2swift.SwiftTypes
 			if (parameter == null)
 				throw new ArgumentNullException("parameter");
 
-			_typeParameters.Add(parameter);
+			if (_parameters.Contains(parameter))
+				throw new ArgumentException(String.Format("Duplicate parameter : {0}.", parameter.Name));
+
+			_parameters.Add(parameter);
+			_orderedParameters.Add(parameter);
+		}
+
+		public void AddTypeParameterContraint(SwiftPlaceholder parameter, SwiftType constraint)
+		{
+			if (parameter == null)
+				throw new ArgumentNullException("parameter");
+
+			if (constraint == null)
+				throw new ArgumentNullException("constraint");
+
+			if (!_parameters.Contains(parameter))
+				throw new ArgumentException(String.Format("Unknown parameter : {0}.", parameter.Name));
+
+			_parameterContraints.Add(parameter, constraint);
+		}
+
+		public SwiftType GetTypeParameterConstraint(SwiftPlaceholder parameter)
+		{
+			if (parameter == null)
+				throw new ArgumentNullException("parameter");
+
+			SwiftType constraint;
+
+			if (!_parameterContraints.TryGetValue(parameter, out constraint))
+				constraint = null;
+
+			return constraint;
 		}
 
 		#endregion
@@ -87,14 +126,34 @@ namespace poco2swift.SwiftTypes
 
 			writer.Write(this.Name);
 
-			if (_typeParameters.Count > 0)
+			if (_orderedParameters.Any())
 			{
-				writer.Write("<{0}>", String.Join(", ", from tp in _typeParameters select tp.Name));
+				var separator = "";
+
+				writer.Write("<");
+
+				foreach (var parameter in _orderedParameters)
+				{
+					writer.Write(separator);
+					writer.Write(parameter.Name);
+
+					SwiftType constraint;
+
+					if (_parameterContraints.TryGetValue(parameter, out constraint))
+					{
+						writer.Write(": ");
+						constraint.Write(writer);
+					}
+				}
+
+				writer.Write(">");
 			}
 		}
 
 		#endregion
 
-		private IList<SwiftPlaceholder> _typeParameters = new List<SwiftPlaceholder>();
+		private ISet<SwiftPlaceholder> _parameters = new HashSet<SwiftPlaceholder>();
+		private IList<SwiftPlaceholder> _orderedParameters = new List<SwiftPlaceholder>();
+		private IDictionary<SwiftPlaceholder, SwiftType> _parameterContraints = new Dictionary<SwiftPlaceholder, SwiftType>();
 	}
 }
