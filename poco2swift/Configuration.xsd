@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Pod2SwiftConfiguration"
+    targetNamespace="http://paullalonde.ca/schemas/pod2swift/Configuration.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://paullalonde.ca/schemas/pod2swift/Configuration.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+	<xs:element name="poco2swift" type="Poco2SwiftType"/>
+	
+	<xs:complexType name="Poco2SwiftType">
+		<xs:sequence>
+			<xs:element name="imports" type="ImportsType" minOccurs="0"/>
+			<xs:element name="skip-types" type="SkipsType" minOccurs="0"/>
+			<xs:element name="external-types" type="ExternalsType" minOccurs="0"/>
+			<xs:element name="enumerations" type="EnumerationsType" minOccurs="0"/>
+			<xs:element name="classes" type="ClassesType" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="ImportsType">
+		<xs:sequence>
+			<xs:element name="module" type="ModuleType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="ExternalsType">
+		<xs:sequence>
+			<xs:element name="external-type" type="ExternalType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="SkipsType">
+		<xs:sequence>
+			<xs:element name="skip-type" type="SkipType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="ModuleType">
+		<xs:attribute name="name" type="xs:string" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="ExternalType">
+		<xs:attribute name="full-name" type="xs:string" use="required"/>
+		<xs:attribute name="swift-name" type="xs:string" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="SkipType">
+		<xs:attribute name="full-name" type="xs:string" use="optional"/>
+		<xs:attribute name="match" type="xs:string" use="optional"/>
+	</xs:complexType>
+
+	<xs:complexType name="EnumerationsType">
+		<xs:sequence>
+			<xs:element name="enum" type="EnumType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="ClassesType">
+		<xs:sequence>
+			<xs:element name="class" type="ClassType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="EnumType">
+		<xs:complexContent>
+			<xs:extension base="TypeType">
+				<xs:sequence>
+					<xs:element name="value" type="EnumValueType" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="ClassType">
+		<xs:complexContent>
+			<xs:extension base="TypeType">
+				<xs:sequence>
+					<xs:element name="property" type="PropertyType" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="TypeType">
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="include" type="xs:boolean" use="optional"/>
+		<xs:attribute name="full-name" type="xs:string" use="optional"/>
+		<xs:attribute name="swift-name" type="xs:string" use="optional"/>
+	</xs:complexType>
+
+	<xs:complexType name="PropertyType">
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="skip" type="xs:boolean" use="optional"/>
+		<xs:attribute name="swift-name" type="xs:string" use="optional"/>
+	</xs:complexType>
+
+	<xs:complexType name="EnumValueType">
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="skip" type="xs:boolean" use="optional"/>
+		<xs:attribute name="swift-name" type="xs:string" use="optional"/>
+	</xs:complexType>
+
+</xs:schema>

@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "poco2swift", "poco2swift\poco2swift.csproj", "{25C788CB-A4B3-4889-ABDA-5F1D9BC8CCD4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29C4DD59-1EA1-4EE3-A8CF-CE893F72AE4C}"
+	ProjectSection(SolutionItems) = preProject
+		poco2swift.proj = poco2swift.proj
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "poco2swift.tests", "poco2swift.tests\poco2swift.tests.csproj", "{24AD59C3-0402-4239-AC2D-73DAF69CC09D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "poco2swift.testdata", "poco2swift.testdata\poco2swift.testdata.csproj", "{AFCD2004-1D66-476E-9290-7D93DBCBA06D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{25C788CB-A4B3-4889-ABDA-5F1D9BC8CCD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25C788CB-A4B3-4889-ABDA-5F1D9BC8CCD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25C788CB-A4B3-4889-ABDA-5F1D9BC8CCD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25C788CB-A4B3-4889-ABDA-5F1D9BC8CCD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24AD59C3-0402-4239-AC2D-73DAF69CC09D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24AD59C3-0402-4239-AC2D-73DAF69CC09D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24AD59C3-0402-4239-AC2D-73DAF69CC09D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24AD59C3-0402-4239-AC2D-73DAF69CC09D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFCD2004-1D66-476E-9290-7D93DBCBA06D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFCD2004-1D66-476E-9290-7D93DBCBA06D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFCD2004-1D66-476E-9290-7D93DBCBA06D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFCD2004-1D66-476E-9290-7D93DBCBA06D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

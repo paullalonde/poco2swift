@@ -1,0 +1,9 @@
+Skipping undefined class 'System.DateTime'.
+Skipping undefined generic type definition 'System.Nullable`1'.
+Skipping property of undefined type 'SoftInfo.Dme.ServicesDme.Common.Model.Reference.DmeBillableAct.ActiveOn'.
+Skipping undefined class 'System.DateTime'.
+Skipping undefined generic type definition 'System.Nullable`1'.
+Skipping property of undefined type 'SoftInfo.Dme.ServicesDme.Common.Model.Reference.DmeBillableAct.Inactive'.
+Skipping undefined class 'System.DateTime'.
+Skipping undefined generic type definition 'System.Nullable`1'.
+Skipping property of undefined type 'SoftInfo.Dme.ServicesDme.Common.Model.Reference.DmeBillableAct.ModifiedOn'.
