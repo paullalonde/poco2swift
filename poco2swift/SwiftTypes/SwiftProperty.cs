@@ -14,12 +14,13 @@ namespace poco2swift.SwiftTypes
 				throw new ArgumentNullException("type");
 
 			this.Name = name;
+			this.Type = type;
 
-			_type = type;
 			_isConstant = isConstant;
 		}
 
 		public string Name { get; private set; }
+		public SwiftType Type { get; private set; }
 		public string BriefComment { get; set; }
 
 		public void WriteDeclaration(TextWriter writer)
@@ -29,11 +30,10 @@ namespace poco2swift.SwiftTypes
 
 			SwiftComposite.WriteComment(1, writer, this.BriefComment);
 			writer.Write("\t{0} {1}: ", _isConstant ? "let" : "var", this.Name);
-			_type.Write(writer);
+			this.Type.Write(writer);
 			writer.WriteLine();
 		}
 
-		private SwiftType _type;
 		private bool _isConstant;
 	}
 }

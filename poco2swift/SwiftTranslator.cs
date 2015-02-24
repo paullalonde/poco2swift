@@ -62,12 +62,11 @@ namespace poco2swift
 			if (_swiftTypes.TryGetValue(type, out swiftType))
 				return swiftType;
 
-			//if (type.IsGenericParameter)
-			//{
-			//	swiftType = TranslateGenericParameter(type);
-			//}
-			//else 
-			if (type.IsArray)
+			if (type.IsGenericParameter)
+			{
+				swiftType = TranslateGenericParameter(type);
+			}
+			else if (type.IsArray)
 			{
 				swiftType = TranslateArray(type);
 			}
@@ -91,14 +90,14 @@ namespace poco2swift
 			return swiftType;
 		}
 
-		//private SwiftType TranslateGenericParameter(Type parameterType)
-		//{
-		//	var swiftType = new SwiftPlaceholder(parameterType.Name);
+		private SwiftType TranslateGenericParameter(Type parameterType)
+		{
+			var swiftType = new SwiftPlaceholder(parameterType.Name);
 
-		//	_swiftTypes.Add(parameterType, swiftType);
+			_swiftTypes.Add(parameterType, swiftType);
 
-		//	return swiftType;
-		//}
+			return swiftType;
+		}
 
 		private SwiftType TranslateArray(Type arrayType)
 		{
@@ -183,19 +182,45 @@ namespace poco2swift
 
 			if (classType.IsGenericType)
 			{
-				foreach (var typeArg in classType.GetGenericArguments())
+				if (classType.IsGenericTypeDefinition)
 				{
-					var swiftTypeArg = TranslateType(typeArg);
-
-					if (swiftTypeArg == null)
+					foreach (var typeArg in classType.GetGenericArguments())
 					{
-						ErrorHandler.Error("Skipping generic parameter of class '{0}' because of undefined class '{1}'.", classType.Name, typeArg.FullName);
+						if (typeArg.IsGenericParameter)
+						{
+							swiftClass.AddTypeParameter(new SwiftPlaceholder(typeArg.Name));
+						}
+						else
+						{
+							throw new InvalidOperationException();
+						}
 
-						continue;
+						//var swiftTypeArg = TranslateType(typeArg);
+
+						//if (swiftTypeArg == null)
+						//{
+						//	ErrorHandler.Error("Skipping generic parameter of class '{0}' because of undefined type '{1}'.", classType.Name, typeArg.FullName);
+
+						//	continue;
+						//}
+
+						//swiftClass.AddTypeParameter(typeArg.Name, swiftTypeArg);
 					}
-
-					//swiftClass.AddTypeParameter(typeArg.Name, swiftTypeArg);
 				}
+
+				//foreach (var typeArg in classType.GetGenericArguments())
+				//{
+				//	var swiftTypeArg = TranslateType(typeArg);
+
+				//	if (swiftTypeArg == null)
+				//	{
+				//		ErrorHandler.Error("Skipping generic parameter of class '{0}' because of undefined class '{1}'.", classType.Name, typeArg.FullName);
+
+				//		continue;
+				//	}
+
+				//	//swiftClass.AddTypeParameter(typeArg.Name, swiftTypeArg);
+				//}
 			}
 
 			foreach (var property in ReadProperties(classType))

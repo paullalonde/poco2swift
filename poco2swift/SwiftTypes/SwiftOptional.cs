@@ -10,9 +10,12 @@ namespace poco2swift.SwiftTypes
 			if (innerType == null)
 				throw new ArgumentNullException("innerType");
 
-			_innerType = innerType;
+			this.InnerType = innerType;
+			
 			_implicitlyUnwrapped = implicitlyUnwrapped;
 		}
+
+		public SwiftType InnerType { get; private set; }
 
 		#region SwiftType overrides
 
@@ -23,13 +26,12 @@ namespace poco2swift.SwiftTypes
 			if (writer == null)
 				throw new ArgumentNullException("writer");
 
-			_innerType.Write(writer);
+			this.InnerType.Write(writer);
 			writer.Write(_implicitlyUnwrapped ? "!" : "?");
 		}
 
 		#endregion
 
-		private SwiftType _innerType;
 		private bool _implicitlyUnwrapped;
 	}
 }

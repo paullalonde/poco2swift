@@ -6,13 +6,18 @@ namespace poco2swift.testdata
 {
 	public class GenericTestClass<TKey, TValue>
 	{
-		TKey Key { get; set; }
-		TValue Value { get; set; }
+		public TKey Key { get; set; }
+		public TValue Value { get; set; }
 	}
 
     public class NonGenericTestClass
     {
-		int Key { get; set; }
-		string Value { get; set; }
+		public int Key { get; set; }
+		public string Value { get; set; }
     }
+
+	public class NonGenericClass_WithGenericProperty
+	{
+		public GenericTestClass<int, string> MyProperty;
+	}
 }
