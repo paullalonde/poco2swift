@@ -20,7 +20,7 @@ $RECYCLE.BIN/
 # Visual Studio files
 bin
 obj
-*.v12.suo
+*.suo
 *.csuser
 
 # =========================
@@ -47,4 +47,7 @@ obj
 Network Trash Folder
 Temporary Items
 .apdisk
-poco2swift.v12.suo
+
+# Project-specific
+testdata
+
