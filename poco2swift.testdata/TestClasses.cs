@@ -18,6 +18,6 @@ namespace poco2swift.testdata
 
 	public class NonGenericClass_WithGenericProperty
 	{
-		public GenericTestClass<int, string> MyProperty;
+		public GenericTestClass<int, string> MyProperty { get; set; }
 	}
 }

@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "poco2swift.tests", "poco2sw
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "poco2swift.testdata", "poco2swift.testdata\poco2swift.testdata.csproj", "{AFCD2004-1D66-476E-9290-7D93DBCBA06D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "poco2swift.probe", "poco2swift.probe\poco2swift.probe.csproj", "{9966A1DA-0C6F-473F-9AD3-5278D1599532}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{AFCD2004-1D66-476E-9290-7D93DBCBA06D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFCD2004-1D66-476E-9290-7D93DBCBA06D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFCD2004-1D66-476E-9290-7D93DBCBA06D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9966A1DA-0C6F-473F-9AD3-5278D1599532}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9966A1DA-0C6F-473F-9AD3-5278D1599532}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9966A1DA-0C6F-473F-9AD3-5278D1599532}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9966A1DA-0C6F-473F-9AD3-5278D1599532}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

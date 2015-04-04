@@ -4,10 +4,11 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using poco2swift.probe;
 
 namespace poco2swift
 {
-	class DataContractFilter : ITypeFilter, IComparer<PropertyInfo>
+	class DataContractFilter : ITypeFilter, IComparer<PropertyProxy>
 	{
 		public DataContractFilter(Poco2SwiftType configuration)
 		{
@@ -21,7 +22,7 @@ namespace poco2swift
 
 		#region ITypeFilter implementation
 
-		public bool IsGoodType(Type type)
+		public bool IsGoodType(TypeProxy type)
 		{
 			if (type == null)
 				throw new ArgumentNullException("type");
@@ -41,7 +42,7 @@ namespace poco2swift
 			return false;
 		}
 
-		public string GetTypeName(Type type)
+		public string GetTypeName(TypeProxy type)
 		{
 			if (type == null)
 				throw new ArgumentNullException("type");
@@ -68,7 +69,7 @@ namespace poco2swift
 			return type.Name;
 		}
 
-		public bool IsGoodProperty(PropertyInfo property)
+		public bool IsGoodProperty(PropertyProxy property)
 		{
 			if (property == null)
 				throw new ArgumentNullException("property");
@@ -89,7 +90,7 @@ namespace poco2swift
 			return false;
 		}
 
-		public string GetPropertyName(PropertyInfo property)
+		public string GetPropertyName(PropertyProxy property)
 		{
 			if (property == null)
 				throw new ArgumentNullException("property");
@@ -113,7 +114,7 @@ namespace poco2swift
 			return property.Name;
 		}
 
-		public IEnumerable<PropertyInfo> SortProperties(IEnumerable<PropertyInfo> properties)
+		public IEnumerable<PropertyProxy> SortProperties(IEnumerable<PropertyProxy> properties)
 		{
 			if (properties == null)
 				throw new ArgumentNullException("properties");
@@ -121,7 +122,7 @@ namespace poco2swift
 			return properties.OrderBy(pi => pi, this);
 		}
 
-		public bool IsGoodEnumValue(Enum value)
+		public bool IsGoodEnumValue(EnumValueProxy value)
 		{
 			if (value == null)
 				throw new ArgumentNullException("value");
@@ -131,18 +132,18 @@ namespace poco2swift
 			if ((valueType != null) && valueType.skipSpecified && valueType.skip)
 				return false;
 
-			var enumType = value.GetType();
+			var enumType = value.GetEnumType();
 			var contract = GetContract(enumType);
 
 			if (contract == null)
 				return true;
 
-			var enumContract = GetContract(enumType, value);
+			var enumContract = GetContract(value);
 
 			return (enumContract != null);
 		}
 
-		public string GetEnumName(Enum value)
+		public string GetEnumName(EnumValueProxy value)
 		{
 			if (value == null)
 				throw new ArgumentNullException("value");
@@ -152,41 +153,39 @@ namespace poco2swift
 			if ((valueType != null) && !String.IsNullOrEmpty(valueType.swiftname))
 				return valueType.swiftname;
 
-			return value.ToString();
+			return value.Name;
 		}
 
-		public object GetUnderlyingEnumValue(Enum value)
+		public object GetUnderlyingEnumValue(EnumValueProxy value)
 		{
 			if (value == null)
 				throw new ArgumentNullException("value");
 
-			var enumType = value.GetType();
+			var enumType = value.GetEnumType();
 			var contract = GetContract(enumType);
-			object sourceValue = value;
+			object underlyingValue = value.GetUnderlyingValue();
 
 			if (contract != null)
 			{
-				var enumContract = GetContract(enumType, value);
+				var enumContract = GetContract(value);
 
 				if (enumContract != null)
 				{
 					if (!String.IsNullOrEmpty(enumContract.Value))
 					{
-						sourceValue = enumContract.Value;
+						underlyingValue = value.ConvertToUnderlyingValue(enumContract.Value);
 					}
 				}
 			}
 
-			var underlyingType = Enum.GetUnderlyingType(enumType);
-
-			return Convert.ChangeType(sourceValue, underlyingType);
+			return underlyingValue;
 		}
 
 		#endregion
 
 		#region IComparer<PropertyInfo> implementation
 
-		int IComparer<PropertyInfo>.Compare(PropertyInfo x, PropertyInfo y)
+		int IComparer<PropertyProxy>.Compare(PropertyProxy x, PropertyProxy y)
 		{
 			var order1 = GetOrder(x);
 			var order2 = GetOrder(y);
@@ -203,25 +202,25 @@ namespace poco2swift
 
 		#endregion
 
-		private bool IsGoodClassType(Type classType)
+		private bool IsGoodClassType(TypeProxy classType)
 		{
 			return (GetContract(classType) != null);
 		}
 
-		private bool IsGoodEnumType(Type enumType)
+		private bool IsGoodEnumType(TypeProxy enumType)
 		{
 			return true;
 		}
 
-		private DataContractAttribute GetContract(Type type)
+		private DataContractProxy GetContract(TypeProxy type)
 		{
 			if (type.IsClass || type.IsValueType || type.IsEnum)
 			{
-				DataContractAttribute contract = null;
+				DataContractProxy contract = null;
 
 				if (!_typeContracts.TryGetValue(type, out contract))
 				{
-					contract = type.GetCustomAttribute(typeof(DataContractAttribute)) as DataContractAttribute;
+					contract = type.GetDataContract();
 
 					_typeContracts.Add(type, contract);
 				}
@@ -232,13 +231,13 @@ namespace poco2swift
 			return null;
 		}
 
-		private DataMemberAttribute GetContract(PropertyInfo property)
+		private DataMemberProxy GetContract(PropertyProxy property)
 		{
-			DataMemberAttribute contract = null;
+			DataMemberProxy contract = null;
 
 			if (!_propertyContracts.TryGetValue(property, out contract))
 			{
-				contract = property.GetCustomAttribute(typeof(DataMemberAttribute)) as DataMemberAttribute;
+				contract = property.GetDataContract();
 
 				_propertyContracts.Add(property, contract);
 			}
@@ -246,15 +245,13 @@ namespace poco2swift
 			return contract;
 		}
 
-		private EnumMemberAttribute GetContract(Type enumType, Enum value)
+		private EnumMemberProxy GetContract(EnumValueProxy value)
 		{
-			EnumMemberAttribute contract = null;
+			EnumMemberProxy contract = null;
 
 			if (!_enumContracts.TryGetValue(value, out contract))
 			{
-				var member = enumType.GetMember(value.ToString())[0];
-
-				contract = member.GetCustomAttribute(typeof(EnumMemberAttribute)) as EnumMemberAttribute;
+				contract = value.GetDataContract();
 
 				_enumContracts.Add(value, contract);
 			}
@@ -262,14 +259,14 @@ namespace poco2swift
 			return contract;
 		}
 
-		private int GetOrder(PropertyInfo property)
+		private int GetOrder(PropertyProxy property)
 		{
 			var contract = GetContract(property);
 
 			return (contract != null) ? contract.Order : -1;
 		}
 
-		private string GetName(PropertyInfo property)
+		private string GetName(PropertyProxy property)
 		{
 			var contract = GetContract(property);
 
@@ -279,7 +276,7 @@ namespace poco2swift
 				return property.Name;
 		}
 
-		private PropertyType ConfigurationForProperty(PropertyInfo property)
+		private PropertyType ConfigurationForProperty(PropertyProxy property)
 		{
 			var ct = ConfigurationForClassType(property.DeclaringType);
 
@@ -295,9 +292,9 @@ namespace poco2swift
 			return null;
 		}
 
-		private EnumValueType ConfigurationForEnumValue(Enum value)
+		private EnumValueType ConfigurationForEnumValue(EnumValueProxy value)
 		{
-			var ct = ConfigurationForEnumType(value.GetType());
+			var ct = ConfigurationForEnumType(value.GetEnumType());
 
 			if ((ct == null) || (ct.value == null))
 				return null;
@@ -311,21 +308,21 @@ namespace poco2swift
 			return null;
 		}
 
-		private ClassType ConfigurationForClassType(Type classType)
+		private ClassType ConfigurationForClassType(TypeProxy classType)
 		{
 			var tt = ConfigurationForType(classType);
 
 			return (tt != null) ? tt as ClassType : null;
 		}
 
-		private EnumType ConfigurationForEnumType(Type classType)
+		private EnumType ConfigurationForEnumType(TypeProxy classType)
 		{
 			var tt = ConfigurationForType(classType);
 
 			return (tt != null) ? tt as EnumType : null;
 		}
 
-		private TypeType ConfigurationForType(Type type)
+		private TypeType ConfigurationForType(TypeProxy type)
 		{
 			TypeType tt;
 
@@ -338,7 +335,7 @@ namespace poco2swift
 			return null;
 		}
 
-		private bool IsSkippedType(Type type)
+		private bool IsSkippedType(TypeProxy type)
 		{
 			var fullname = type.FullName;
 
@@ -369,9 +366,9 @@ namespace poco2swift
 		}
 
 		private readonly Poco2SwiftType _configuration;
-		private readonly IDictionary<Type, DataContractAttribute> _typeContracts = new Dictionary<Type, DataContractAttribute>();
-		private readonly IDictionary<PropertyInfo, DataMemberAttribute> _propertyContracts = new Dictionary<PropertyInfo, DataMemberAttribute>();
-		private readonly IDictionary<Enum, EnumMemberAttribute> _enumContracts = new Dictionary<Enum, EnumMemberAttribute>();
+		private readonly IDictionary<TypeProxy, DataContractProxy> _typeContracts = new Dictionary<TypeProxy, DataContractProxy>();
+		private readonly IDictionary<PropertyProxy, DataMemberProxy> _propertyContracts = new Dictionary<PropertyProxy, DataMemberProxy>();
+		private readonly IDictionary<EnumValueProxy, EnumMemberProxy> _enumContracts = new Dictionary<EnumValueProxy, EnumMemberProxy>();
 		private ISet<string> _skipFullnames;
 		private IEnumerable<Regex> _skipRegexes;
 		private IDictionary<string, TypeType> _typesByName;

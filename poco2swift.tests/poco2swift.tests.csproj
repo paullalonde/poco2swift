@@ -50,11 +50,18 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="NullAppDomain.cs" />
+    <Compile Include="NullProxyCallback.cs" />
+    <Compile Include="NullProxyUtils.cs" />
     <Compile Include="NullTypeFilter.cs" />
     <Compile Include="TranslatorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\poco2swift.probe\poco2swift.probe.csproj">
+      <Project>{9966a1da-0c6f-473f-9ad3-5278d1599532}</Project>
+      <Name>poco2swift.probe</Name>
+    </ProjectReference>
     <ProjectReference Include="..\poco2swift.testdata\poco2swift.testdata.csproj">
       <Project>{afcd2004-1d66-476e-9290-7d93dbcba06d}</Project>
       <Name>poco2swift.testdata</Name>

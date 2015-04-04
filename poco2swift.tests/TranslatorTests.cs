@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using poco2swift.probe;
 using poco2swift.SwiftTypes;
 using poco2swift.testdata;
 
@@ -9,6 +10,8 @@ namespace poco2swift.tests
 	[TestClass]
 	public class TranslatorTests
 	{
+		private IProxyUtils _proxyUtils;
+		private IAppDomainProxy _appDomain;
 		private SwiftTranslator _translator;
 
 		[TestInitialize]
@@ -24,22 +27,27 @@ namespace poco2swift.tests
 			};
 			var filter = new NullTypeFilter();
 			var documentation = new DocumentationCache();
+			var callback = new NullProxyCallback();
 
-			_translator = new SwiftTranslator(configuration, filter, documentation);
+			_proxyUtils = new NullProxyUtils { Callback = callback };
+			_appDomain = new NullAppDomain { Utils = _proxyUtils };
+			_translator = new SwiftTranslator(configuration, filter, documentation, _appDomain);
 		}
 
-		private void AddType(Type type)
+		private TypeProxy AddType(Type type)
 		{
-			_translator.CacheSwiftName(type, type.Name);
+			var proxy = _proxyUtils.MakeTypeProxy(type);
+
+			_translator.CacheSwiftName(proxy, type.Name);
+
+			return proxy;
 		}
 
 		[TestMethod]
 		public void NonGenericClass_MakesNonGenericSwiftClass()
 		{
 			// Arrange
-			var expectedType = typeof(NonGenericTestClass);
-
-			AddType(expectedType);
+			var expectedType = AddType(typeof(NonGenericTestClass));
 
 			// Act
 			var result = _translator.TranslateType(expectedType);
@@ -62,11 +70,9 @@ namespace poco2swift.tests
 		public void GenericClass_MakesGenericSwiftClass()
 		{
 			// Arrange
-			var expectedType = typeof(GenericTestClass<,>);
+			var expectedType = AddType(typeof(GenericTestClass<,>));
 			var keyParameter = new SwiftPlaceholder("TKey");
 			var valueParameter = new SwiftPlaceholder("TValue");
-
-			AddType(expectedType);
 
 			// Act
 			var result = _translator.TranslateType(expectedType);
@@ -93,11 +99,11 @@ namespace poco2swift.tests
 		public void NonGenericClass_WithGenericProperty_MakesNonGenericSwiftClass()
 		{
 			// Arrange
-			var expectedType = typeof(NonGenericClass_WithGenericProperty);
+			var expectedType = AddType(typeof(NonGenericClass_WithGenericProperty));
 			var keyParameter = new SwiftPlaceholder("TKey");
 			var valueParameter = new SwiftPlaceholder("TValue");
 
-			AddType(expectedType);
+			AddType(typeof(GenericTestClass<,>));
 
 			// Act
 			var result = _translator.TranslateType(expectedType);

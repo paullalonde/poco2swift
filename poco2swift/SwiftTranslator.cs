@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using poco2swift.probe;
 using poco2swift.SwiftTypes;
 
 namespace poco2swift
 {
 	public class SwiftTranslator
 	{
-		public SwiftTranslator(Poco2SwiftType configuration, ITypeFilter filter, DocumentationCache documentation)
+		public SwiftTranslator(Poco2SwiftType configuration, ITypeFilter filter, DocumentationCache documentation, IAppDomainProxy appDomain)
 		{
 			if (configuration == null)
 				throw new ArgumentNullException("configuration");
@@ -19,22 +20,46 @@ namespace poco2swift
 			if (documentation == null)
 				throw new ArgumentNullException("documentation");
 
+			if (appDomain == null)
+				throw new ArgumentNullException("appDomain");
+
 			_configuration = configuration;
 			_filter = filter;
 			_documentation = documentation;
+			_appDomain = appDomain;
 
+			InitPredefinedMapTypes();
 			CacheMappedTypes();
 		}
 
-		public void CacheSwiftName(Type type, string swiftName)
+		private void InitPredefinedMapTypes()
+		{
+			AddPredefinedMapType(typeof(object), new SwiftClass("Any"));
+			AddPredefinedMapType(typeof(SByte), new SwiftClass("Int8"));
+			AddPredefinedMapType(typeof(Int16), new SwiftClass("Int16"));
+			AddPredefinedMapType(typeof(Int32), new SwiftClass("Int32"));
+			AddPredefinedMapType(typeof(Int64), new SwiftClass("Int64"));
+			AddPredefinedMapType(typeof(Byte), new SwiftClass("UInt8"));
+			AddPredefinedMapType(typeof(UInt16), new SwiftClass("UInt16"));
+			AddPredefinedMapType(typeof(UInt32), new SwiftClass("UInt32"));
+			AddPredefinedMapType(typeof(UInt64), new SwiftClass("UInt64"));
+			AddPredefinedMapType(typeof(string), new SwiftClass("String"));
+			AddPredefinedMapType(typeof(bool), new SwiftClass("Bool"));
+			AddPredefinedMapType(typeof(float), new SwiftClass("Float"));
+			AddPredefinedMapType(typeof(double), new SwiftClass("Double"));
+			//AddPredefinedMapType(typeof(Guid),   new SwiftPrimitive(TypeCode.NSUUID));
+			//AddPredefinedMapType(typeof(Uri),    new SwiftPrimitive(TypeCode.NSURL));
+		}
+
+		public void CacheSwiftName(TypeProxy type, string swiftName)
 		{
 			_swiftNamesToTypes.Add(swiftName, type);
 			_swiftTypesToNames.Add(type, swiftName);
 		}
 
-		public IEnumerable<Tuple<SwiftType, Type>> GetCachedSwiftTypes()
+		public IEnumerable<Tuple<SwiftType, TypeProxy>> GetCachedSwiftTypes()
 		{
-			var swiftTypes = new List<Tuple<SwiftType, Type>>();
+			var swiftTypes = new List<Tuple<SwiftType, TypeProxy>>();
 
 			foreach (var kvp in from x in _swiftNamesToTypes orderby x.Key select x)
 			{
@@ -42,7 +67,7 @@ namespace poco2swift
 				SwiftType swiftType;
 
 				if (_swiftTypes.TryGetValue(type, out swiftType))
-					swiftTypes.Add(new Tuple<SwiftType,Type>(swiftType, type));
+					swiftTypes.Add(new Tuple<SwiftType, TypeProxy>(swiftType, type));
 				else
 					ErrorHandler.Error("Missing Swift type for type '{0}'.", type.FullName);
 			}
@@ -50,7 +75,7 @@ namespace poco2swift
 			return swiftTypes;
 		}
 
-		public SwiftType TranslateType(Type type, bool forDefinition = false)
+		public SwiftType TranslateType(TypeProxy type, bool forDefinition = false)
 		{
 			if (type == null)
 				throw new ArgumentNullException("type");
@@ -90,7 +115,7 @@ namespace poco2swift
 			return swiftType;
 		}
 
-		private SwiftType TranslateGenericParameter(Type parameterType)
+		private SwiftType TranslateGenericParameter(TypeProxy parameterType)
 		{
 			var swiftType = new SwiftPlaceholder(parameterType.Name);
 
@@ -99,7 +124,7 @@ namespace poco2swift
 			return swiftType;
 		}
 
-		private SwiftType TranslateArray(Type arrayType)
+		private SwiftType TranslateArray(TypeProxy arrayType)
 		{
 			//Console.Out.WriteLine("Translating array {0}", arrayType.FullName);
 
@@ -115,7 +140,7 @@ namespace poco2swift
 			return swiftType;
 		}
 
-		private SwiftType TranslateInterface(Type classType)
+		private SwiftType TranslateInterface(TypeProxy classType)
 		{
 			return TranslateWellKnownType(classType);
 		}
@@ -125,7 +150,7 @@ namespace poco2swift
 
 		//}
 
-		private SwiftType TranslateClass(Type classType, bool forDefinition)
+		private SwiftType TranslateClass(TypeProxy classType, bool forDefinition)
 		{
 			//Console.Out.WriteLine("Translating class {0}", classType.FullName);
 
@@ -166,7 +191,7 @@ namespace poco2swift
 
 			var baseType = classType.BaseType;
 
-			if (baseType != typeof(object))
+			if (baseType != _appDomain.ObjectType)
 			{
 				var baseSwiftType = TranslateType(baseType);
 
@@ -252,7 +277,7 @@ namespace poco2swift
 			return swiftClass;
 		}
 
-		private SwiftType TranslateWellKnownType(Type classType)
+		private SwiftType TranslateWellKnownType(TypeProxy classType)
 		{
 			//Console.Out.WriteLine("Translating class {0}", classType.FullName);
 
@@ -260,24 +285,27 @@ namespace poco2swift
 			{
 				var typeArgs = classType.GetGenericArguments();
 
-				if (typeArgs.Length == 1)
+				if (typeArgs.Count == 1)
 				{
 					var innerType = typeArgs[0];
 
-					if (innerType.IsValueType && (classType == typeof(Nullable<>).MakeGenericType(typeArgs)))
+					if (innerType.IsValueType && (classType == _appDomain.MakeGenericNullableType(innerType)))
 					{
 						return TranslateNullable(classType, innerType);
 					}
-					else if (typeof(IEnumerable<>).MakeGenericType(typeArgs).IsAssignableFrom(classType))
+					else if (_appDomain.MakeGenericEnumerableType(innerType).IsAssignableFrom(classType))
 					{
 						return TranslateList(classType, innerType);
 					}
 				}
-				else if (typeArgs.Length == 2)
+				else if (typeArgs.Count == 2)
 				{
-					if (typeof(IDictionary<,>).MakeGenericType(typeArgs).IsAssignableFrom(classType))
+					var keyType = typeArgs[0];
+					var valueType = typeArgs[1];
+
+					if (_appDomain.MakeGenericDictionaryType(keyType, valueType).IsAssignableFrom(classType))
 					{
-						return TranslateDictionary(classType, typeArgs[0], typeArgs[1]);
+						return TranslateDictionary(classType, keyType, valueType);
 					}
 				}
 			}
@@ -286,7 +314,7 @@ namespace poco2swift
 		}
 
 
-		private SwiftType TranslateNullable(Type nullableType, Type innerType)
+		private SwiftType TranslateNullable(TypeProxy nullableType, TypeProxy innerType)
 		{
 			// Nullable<T> gets translated into Optional<T>
 
@@ -302,7 +330,7 @@ namespace poco2swift
 			return swiftType;
 		}
 
-		private SwiftType TranslateList(Type collectionType, Type elementType)
+		private SwiftType TranslateList(TypeProxy collectionType, TypeProxy elementType)
 		{
 			// IEnumerable<T> gets translated into [T]
 
@@ -318,7 +346,7 @@ namespace poco2swift
 			return swiftType;
 		}
 
-		private SwiftType TranslateDictionary(Type collectionType, Type keyType, Type valueType)
+		private SwiftType TranslateDictionary(TypeProxy collectionType, TypeProxy keyType, TypeProxy valueType)
 		{
 			// IDictionary<K,V> gets translated into [K: V]
 
@@ -339,9 +367,9 @@ namespace poco2swift
 			return swiftType;
 		}
 
-		private IEnumerable<PropertyInfo> ReadProperties(Type classType)
+		private IEnumerable<PropertyProxy> ReadProperties(TypeProxy classType)
 		{
-			var properties = new List<PropertyInfo>();
+			var properties = new List<PropertyProxy>();
 
 			foreach (var property in classType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 			{
@@ -357,7 +385,7 @@ namespace poco2swift
 			return _filter.SortProperties(properties);
 		}
 
-		private SwiftType TranslateEnum(Type enumType)
+		private SwiftType TranslateEnum(TypeProxy enumType)
 		{
 			string name;
 
@@ -373,9 +401,9 @@ namespace poco2swift
 				BriefComment = _documentation.GetTypeSummary(enumType),
 			};
 
-			var baseType = Enum.GetUnderlyingType(enumType);
+			var baseType = enumType.GetEnumUnderlyingType();
 
-			if (baseType != typeof(object))
+			if (baseType != _appDomain.ObjectType)
 			{
 				var baseSwiftType = TranslateType(baseType);
 
@@ -391,12 +419,9 @@ namespace poco2swift
 
 			_swiftTypes.Add(enumType, swiftEnum);
 
-			var rawType = Enum.GetUnderlyingType(enumType);
-
-			foreach (var value in Enum.GetValues(enumType).Cast<Enum>())
+			foreach (var value in enumType.GetEnumValues())
 			{
-				var valueName = Enum.GetName(enumType, value);
-				var member = enumType.GetMember(valueName)[0];
+				var member = value.GetMember();
 				var swiftValueName = _filter.GetEnumName(value);
 				var underlyingValue = _filter.GetUnderlyingEnumValue(value);
 
@@ -429,7 +454,7 @@ namespace poco2swift
 						continue;
 					}
 
-					var type = Type.GetType(externalType.fullname);
+					var type = _appDomain.GetDomainType(externalType.fullname);
 					var swiftType = new SwiftClass(externalType.swiftname);
 
 					_swiftTypes.Add(type, swiftType);
@@ -438,37 +463,27 @@ namespace poco2swift
 
 			// Add predefined map types.
 
-			foreach (var kvp in _PredefinedMapTypes)
+			foreach (var kvp in _predefinedMapTypes)
 			{
 				if (!_swiftTypes.ContainsKey(kvp.Key))
 					_swiftTypes.Add(kvp.Key, kvp.Value);
 			}
 		}
 
+		private void AddPredefinedMapType(Type type, SwiftClass swiftClass)
+		{
+			var proxy = _appDomain.GetDomainType(type.AssemblyQualifiedName);
+
+			_predefinedMapTypes.Add(proxy, swiftClass);
+		}
+
 		private readonly Poco2SwiftType _configuration;
 		private readonly ITypeFilter _filter;
 		private readonly DocumentationCache _documentation;
-		private IDictionary<Type, SwiftType> _swiftTypes = new Dictionary<Type, SwiftType>();
-		private IDictionary<string, Type> _swiftNamesToTypes = new Dictionary<string, Type>();
-		private IDictionary<Type, string> _swiftTypesToNames = new Dictionary<Type, string>();
-
-		private static readonly IDictionary<Type, SwiftClass> _PredefinedMapTypes = new Dictionary<Type, SwiftClass>
-		{
-			{ typeof(object), new SwiftClass("Any")    },
-			{ typeof(SByte),  new SwiftClass("Int8")   },
-			{ typeof(Int16),  new SwiftClass("Int16")  },
-			{ typeof(Int32),  new SwiftClass("Int32")  },
-			{ typeof(Int64),  new SwiftClass("Int64")  },
-			{ typeof(Byte),   new SwiftClass("UInt8")  },
-			{ typeof(UInt16), new SwiftClass("UInt16") },
-			{ typeof(UInt32), new SwiftClass("UInt32") },
-			{ typeof(UInt64), new SwiftClass("UInt64") },
-			{ typeof(string), new SwiftClass("String") },
-			{ typeof(bool),   new SwiftClass("Bool")   },
-			{ typeof(float),  new SwiftClass("Float")  },
-			{ typeof(double), new SwiftClass("Double") },
-			//{ typeof(Guid),   new SwiftPrimitive(TypeCode.NSUUID) },
-			//{ typeof(Uri),    new SwiftPrimitive(TypeCode.NSURL)  },
-		};
+		private readonly IAppDomainProxy _appDomain;
+		private readonly IDictionary<TypeProxy, SwiftType> _swiftTypes = new Dictionary<TypeProxy, SwiftType>();
+		private readonly IDictionary<string, TypeProxy> _swiftNamesToTypes = new Dictionary<string, TypeProxy>();
+		private readonly IDictionary<TypeProxy, string> _swiftTypesToNames = new Dictionary<TypeProxy, string>();
+		private readonly IDictionary<TypeProxy, SwiftClass> _predefinedMapTypes = new Dictionary<TypeProxy, SwiftClass>();
 	}
 }

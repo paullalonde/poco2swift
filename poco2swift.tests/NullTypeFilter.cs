@@ -4,12 +4,13 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using poco2swift.probe;
 
 namespace poco2swift.tests
 {
 	class NullTypeFilter : ITypeFilter
 	{
-		public bool IsGoodType(Type type)
+		public bool IsGoodType(TypeProxy type)
 		{
 			if (type == null)
 				throw new ArgumentNullException("type");
@@ -17,7 +18,7 @@ namespace poco2swift.tests
 			return true;
 		}
 
-		public string GetTypeName(Type type)
+		public string GetTypeName(TypeProxy type)
 		{
 			if (type == null)
 				throw new ArgumentNullException("type");
@@ -36,7 +37,7 @@ namespace poco2swift.tests
 			return type.Name;
 		}
 
-		public bool IsGoodProperty(PropertyInfo property)
+		public bool IsGoodProperty(PropertyProxy property)
 		{
 			if (property == null)
 				throw new ArgumentNullException("property");
@@ -44,7 +45,7 @@ namespace poco2swift.tests
 			return true;
 		}
 
-		public string GetPropertyName(PropertyInfo property)
+		public string GetPropertyName(PropertyProxy property)
 		{
 			if (property == null)
 				throw new ArgumentNullException("property");
@@ -52,7 +53,7 @@ namespace poco2swift.tests
 			return property.Name;
 		}
 
-		public IEnumerable<PropertyInfo> SortProperties(IEnumerable<PropertyInfo> properties)
+		public IEnumerable<PropertyProxy> SortProperties(IEnumerable<PropertyProxy> properties)
 		{
 			if (properties == null)
 				throw new ArgumentNullException("properties");
@@ -60,7 +61,7 @@ namespace poco2swift.tests
 			return properties;
 		}
 
-		public bool IsGoodEnumValue(Enum value)
+		public bool IsGoodEnumValue(EnumValueProxy value)
 		{
 			if (value == null)
 				throw new ArgumentNullException("value");
@@ -68,7 +69,7 @@ namespace poco2swift.tests
 			return true;
 		}
 
-		public string GetEnumName(Enum value)
+		public string GetEnumName(EnumValueProxy value)
 		{
 			if (value == null)
 				throw new ArgumentNullException("value");
@@ -76,15 +77,12 @@ namespace poco2swift.tests
 			return value.ToString();
 		}
 
-		public object GetUnderlyingEnumValue(Enum value)
+		public object GetUnderlyingEnumValue(EnumValueProxy value)
 		{
 			if (value == null)
 				throw new ArgumentNullException("value");
 
-			var enumType = value.GetType();
-			var underlyingType = Enum.GetUnderlyingType(enumType);
-
-			return Convert.ChangeType(value, underlyingType);
+			return value.GetUnderlyingValue();
 		}
 	}
 }

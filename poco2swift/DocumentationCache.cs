@@ -4,12 +4,13 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Xml;
+using poco2swift.probe;
 
 namespace poco2swift
 {
 	public class DocumentationCache
 	{
-		public string GetTypeSummary(Type type)
+		public string GetTypeSummary(TypeProxy type)
 		{
 			if (type == null)
 				throw new ArgumentNullException("type");
@@ -17,7 +18,7 @@ namespace poco2swift
 			return GetSummary(type, GetTypeXPath(type));
 		}
 
-		public string GetPropertySummary(PropertyInfo property)
+		public string GetPropertySummary(PropertyProxy property)
 		{
 			if (property == null)
 				throw new ArgumentNullException("property");
@@ -25,7 +26,7 @@ namespace poco2swift
 			return GetSummary(property.DeclaringType, GetPropertyXPath(property));
 		}
 
-		public string GetFieldSummary(MemberInfo field)
+		public string GetFieldSummary(MemberProxy field)
 		{
 			if (field == null)
 				throw new ArgumentNullException("field");
@@ -33,12 +34,12 @@ namespace poco2swift
 			return GetSummary(field.DeclaringType, GetFieldXPath(field));
 		}
 
-		private string GetSummary(Type type, string xpathRoot)
+		private string GetSummary(TypeProxy type, string xpathRoot)
 		{
 			return GetDocumentation(type, xpathRoot, "/summary");
 		}
 
-		private string GetDocumentation(Type type, string xpathRoot, string subpath)
+		private string GetDocumentation(TypeProxy type, string xpathRoot, string subpath)
 		{
 			var document = GetDocument(type.Assembly);
 
@@ -53,22 +54,22 @@ namespace poco2swift
 			return null;
 		}
 
-		private static string GetTypeXPath(Type type)
+		private static string GetTypeXPath(TypeProxy type)
 		{
 			return String.Format(CultureInfo.InvariantCulture, "/doc/members/member[@name = 'T:{0}']", type.FullName);
 		}
 
-		private static string GetPropertyXPath(PropertyInfo property)
+		private static string GetPropertyXPath(PropertyProxy property)
 		{
 			return String.Format(CultureInfo.InvariantCulture, "/doc/members/member[@name = 'P:{0}.{1}']", property.DeclaringType.FullName, property.Name);
 		}
 
-		private static string GetFieldXPath(MemberInfo field)
+		private static string GetFieldXPath(MemberProxy field)
 		{
 			return String.Format(CultureInfo.InvariantCulture, "/doc/members/member[@name = 'F:{0}.{1}']", field.DeclaringType.FullName, field.Name);
 		}
 
-		private XmlDocument GetDocument(Assembly assembly)
+		private XmlDocument GetDocument(AssemblyProxy assembly)
 		{
 			XmlDocument document = null;
 
@@ -91,6 +92,6 @@ namespace poco2swift
 			return document;
 		}
 
-		private IDictionary<Assembly, XmlDocument> _cache = new Dictionary<Assembly, XmlDocument>();
+		private IDictionary<AssemblyProxy, XmlDocument> _cache = new Dictionary<AssemblyProxy, XmlDocument>();
 	}
 }

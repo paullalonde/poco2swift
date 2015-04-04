@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Serialization;
+using poco2swift.probe;
 
 namespace poco2swift
 {
@@ -32,34 +34,47 @@ namespace poco2swift
 		private void Run()
 		{
 			ReadConfiguration();
+			CreateTargetDomain();
 			LoadAssemblies();
 
 			_typeFilter = new DataContractFilter(_configuration);
 			_documentation = new DocumentationCache();
-			_translator = new SwiftTranslator(_configuration, _typeFilter, _documentation);
+			_translator = new SwiftTranslator(_configuration, _typeFilter, _documentation, _targetDomainProxy);
 
 			ReadTypes();
 			TranslateTypes();
 			WriteSwiftSource();
 		}
 
+		private void CreateTargetDomain()
+		{
+			_targetDomainSetup = new AppDomainSetup
+			{
+				ApplicationBase = _basePath,
+				ApplicationName = "poco2swift target app",
+				DisallowCodeDownload = true,
+			};
+
+			_targetDomain = AppDomain.CreateDomain("poco2swift target", null, _targetDomainSetup);
+
+			var assemblyPath = typeof(AppDomainProxy).Assembly.Location;
+			var typeName = typeof(AppDomainProxy).FullName;
+			var bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance;
+			var args = new object[] { AppDomain.CurrentDomain };
+			var culture = CultureInfo.CurrentCulture;
+
+			_targetDomainProxy = (AppDomainProxy)_targetDomain.CreateInstanceFromAndUnwrap(assemblyPath, typeName, false, bindingFlags, null, args, culture, null);
+		}
+
 		private void LoadAssemblies()
 		{
 			foreach (var path in _dllPaths)
 			{
-				var assembly = Assembly.LoadFile(path);
+				var assembly = _targetDomainProxy.LoadAssembly(path);
 
-				assembly.ModuleResolve += HandleModuleResolve;
-
-				_assemblies.Add(assembly);
+				if (assembly != null)
+					_assemblies.Add(assembly);
 			}
-		}
-
-		private static Module HandleModuleResolve(object sender, ResolveEventArgs e)
-		{
-			ErrorHandler.Error("Cannot resolve name '{0}' from assembly '{1}'", e.Name, e.RequestingAssembly.FullName);
-
-			return null;
 		}
 
 		private void ReadConfiguration()
@@ -79,24 +94,11 @@ namespace poco2swift
 					using (var xmlReader = XmlReader.Create(textReader))
 					{
 						configuration = (Poco2SwiftType)serializer.Deserialize(xmlReader);
+						
+						configuration.PostDeserialize();
 					}
 				}
 			}
-
-			if (configuration.imports == null)
-				configuration.imports = new ModuleType[0];
-
-			if (configuration.skiptypes == null)
-				configuration.skiptypes = new SkipType[0];
-
-			if (configuration.externaltypes == null)
-				configuration.externaltypes = new ExternalType[0];
-
-			if (configuration.enumerations == null)
-				configuration.enumerations = new EnumType[0];
-
-			if (configuration.classes == null)
-				configuration.classes = new ClassType[0];
 
 			_configuration = configuration;
 
@@ -144,13 +146,13 @@ namespace poco2swift
 					ErrorHandler.Fatal(ErrorHandler.MISSING_FULL_NAME, "Included {0} '{1}' is missing the full-name attribute.", typeName, configType.name);
 				}
 
-				var type = Type.GetType(configType.fullname);
+				var type = _targetDomainProxy.GetDomainType(configType.fullname);
 
 				ReadType(type, forceGoodType: true);
 			}
 		}
 
-		private void ReadType(Type type, bool forceGoodType = false)
+		private void ReadType(TypeProxy type, bool forceGoodType = false)
 		{
 			if (!type.IsEnum && !type.IsClass && !type.IsValueType)
 				return;
@@ -229,11 +231,15 @@ namespace poco2swift
 
 		private Program(string[] args)
 		{
+			_selfLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+
 			ParseArgs(args);
 		}
 
 		private void ParseArgs(string[] args)
 		{
+			string basePath = null;
+
 			for (int argIndex = 0; argIndex < args.Length; ++argIndex)
 			{
 				string arg = args[argIndex];
@@ -242,6 +248,13 @@ namespace poco2swift
 				{
 					switch (arg.Substring(1).ToLowerInvariant())
 					{
+						case "b":
+							if (argIndex < args.Length - 1)
+								basePath = args[++argIndex];
+							else
+								Usage();
+							break;
+
 						case "c":
 							if (argIndex < args.Length - 1)
 								_configPath = args[++argIndex];
@@ -270,11 +283,26 @@ namespace poco2swift
 				}
 			}
 
+			if (String.IsNullOrEmpty(basePath))
+				Usage();
+
 			if (!_dllPaths.Any())
 				Usage();
 
 			if (String.IsNullOrEmpty(_outputDir))
 				Usage();
+
+			_basePath = ResolvePath(basePath);
+		}
+
+		private string ResolvePath(string path)
+		{
+			if (!Path.IsPathRooted(path))
+				path = Path.Combine(_selfLocation, path);
+
+			path = Path.GetFullPath(path);
+
+			return path;
 		}
 
 		private void Usage()
@@ -289,16 +317,21 @@ namespace poco2swift
 			Environment.Exit(20);
 		}
 
+		private string _basePath = null;
 		private IList<string> _dllPaths = new List<string>();
 		private string _outputDir = ".";
 		private string _configPath;
-		private IList<Assembly> _assemblies = new List<Assembly>();
+		private IList<AssemblyProxy> _assemblies = new List<AssemblyProxy>();
 		private Poco2SwiftType _configuration;
 		private IDictionary<string, EnumType> _configuredEnums = new Dictionary<string, EnumType>();
 		private IDictionary<string, ClassType> _configuredClasses = new Dictionary<string, ClassType>();
-		private ISet<Type> _types = new HashSet<Type>();
+		private ISet<TypeProxy> _types = new HashSet<TypeProxy>();
 		private ITypeFilter _typeFilter;
 		private DocumentationCache _documentation;
 		private SwiftTranslator _translator;
+		private AppDomainSetup _targetDomainSetup;
+		private AppDomain _targetDomain;
+		private string _selfLocation;
+		private AppDomainProxy _targetDomainProxy;
 	}
 }

@@ -12,6 +12,7 @@ namespace poco2swift
 		public const int MISSING_FULL_NAME = 2;
 		public const int UNDEFINED_CLASS = 3;
 		public const int UNDEFINED_ENUM = 4;
+		public const int UNRESOLVED_ASSEMBLY = 5;
 
 		public static void Error(string message, params object[] args)
 		{

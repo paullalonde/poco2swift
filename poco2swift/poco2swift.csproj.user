@@ -3,4 +3,7 @@
   <PropertyGroup>
     <ProjectView>ShowAllFiles</ProjectView>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <StartArguments>-b ..\..\..\testdata -c ..\..\Configuration.xml -d SoftInfo.Dme.ServicesDme.Common.Model.dll</StartArguments>
+  </PropertyGroup>
 </Project>

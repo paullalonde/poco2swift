@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using poco2swift.probe;
 using poco2swift.SwiftTypes;
 
 namespace poco2swift
@@ -23,7 +24,7 @@ namespace poco2swift
 			_configuration = configuration;
 		}
 
-		public void Write(SwiftType swiftType, Type type)
+		public void Write(SwiftType swiftType, TypeProxy type)
 		{
 			if (swiftType == null)
 				throw new ArgumentNullException("swiftType");
@@ -46,7 +47,7 @@ namespace poco2swift
 			composite.WriteDeclaration(writer);
 		}
 
-		private TextWriter GetWriter(Type type)
+		private TextWriter GetWriter(TypeProxy type)
 		{
 			var assembly = type.Assembly;
 			TextWriter writer;
@@ -130,6 +131,6 @@ namespace poco2swift
 		private readonly string _outputDir;
 		private readonly Poco2SwiftType _configuration;
 		private bool _disposed;
-		private IDictionary<Assembly, TextWriter> _writers = new Dictionary<Assembly, TextWriter>();
+		private IDictionary<AssemblyProxy, TextWriter> _writers = new Dictionary<AssemblyProxy, TextWriter>();
 	}
 }
