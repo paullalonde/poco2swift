@@ -104,12 +104,18 @@ namespace poco2swift
 
 			foreach (var @enum in configuration.enumerations)
 			{
-				_configuredEnums.Add(@enum.name, @enum);
+				if (@enum.EffectiveFullName != null)
+					@enum.forceinclude = true;
+
+				_configuredEnums.Add(@enum.EffectiveName, @enum);
 			}
 
 			foreach (var @class in configuration.classes)
 			{
-				_configuredClasses.Add(@class.name, @class);
+				if (@class.EffectiveFullName != null)
+					@class.forceinclude = true;
+
+				_configuredClasses.Add(@class.EffectiveName, @class);
 			}
 		}
 
@@ -139,7 +145,7 @@ namespace poco2swift
 
 		private void ReadConfigType(string typeName, TypeType configType)
 		{
-			if (configType.includeSpecified && configType.include)
+			if (configType.forceinclude)
 			{
 				if (String.IsNullOrEmpty(configType.fullname))
 				{
@@ -217,7 +223,7 @@ namespace poco2swift
 
 		private void WriteSwiftSource()
 		{
-			using (var writer = new FileSwiftWriter(_outputDir, _configuration))
+			using (var writer = new FileSwiftWriter(_configuration, _swift12, _outputDir))
 			{
 				foreach (var tuple in _translator.GetCachedSwiftTypes())
 				{
@@ -279,6 +285,13 @@ namespace poco2swift
 								Usage();
 							break;
 
+						case "s":
+							if (argIndex < args.Length - 1)
+								_swift12 = (args[++argIndex] == "1.2");
+							else
+								Usage();
+							break;
+
 						default:
 							Usage();
 							break;
@@ -310,12 +323,12 @@ namespace poco2swift
 
 		private void Usage()
 		{
-			Console.Out.WriteLine("mmwfup [-d] [-o <path>] [-hack_60_70] [-update_v1]");
-			Console.Out.WriteLine("   -d          Dump workflow instances.");
-			Console.Out.WriteLine("   -l <path>   Path to the log file.");
-			Console.Out.WriteLine("   -o <path>   Directory to receive the dumped workflow instances.");
-			Console.Out.WriteLine("   -hack_60_70 Hack the serialized workflow instances to work around compatibility bugs in Dme classes between 4.0.6x and 4.0.7x.");
-			Console.Out.WriteLine("   -update_v1  Update all workflow instances to version 1.");
+			Console.Out.WriteLine("poco2swift [-b <path>] [-c <path>] [-d <path>]...  [-o <path>] [-s 1.2]");
+			Console.Out.WriteLine("   -b <path>   The base path for loading the source assemblies.");
+			Console.Out.WriteLine("   -c <path>   Path to the configuration file.");
+			Console.Out.WriteLine("   -d <path>   Path of an assembly to translate, relative to base path. May be specified more than once.");
+			Console.Out.WriteLine("   -o <path>   Directory to receive generated Swift source files.");
+			Console.Out.WriteLine("   -s 1.2      Emit Swift 1.2");
 
 			Environment.Exit(20);
 		}
@@ -336,5 +349,6 @@ namespace poco2swift
 		private AppDomain _targetDomain;
 		private string _selfLocation;
 		private AppDomainProxy _targetDomainProxy;
+		private bool _swift12;
 	}
 }

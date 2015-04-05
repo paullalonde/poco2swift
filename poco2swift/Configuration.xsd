@@ -42,6 +42,7 @@
 	<xs:complexType name="ExternalType">
 		<xs:attribute name="full-name" type="xs:string" use="required"/>
 		<xs:attribute name="swift-name" type="xs:string" use="required"/>
+		<xs:attribute name="is-value-type" type="xs:boolean" use="optional" default="false"/>
 	</xs:complexType>
 
 	<xs:complexType name="SkipType">
@@ -82,8 +83,8 @@
 	</xs:complexType>
 
 	<xs:complexType name="TypeType">
-		<xs:attribute name="name" type="xs:string" use="required"/>
-		<xs:attribute name="include" type="xs:boolean" use="optional"/>
+		<xs:attribute name="name" type="xs:string" use="optional"/>
+		<xs:attribute name="force-include" type="xs:boolean" use="optional" default="false"/>
 		<xs:attribute name="full-name" type="xs:string" use="optional"/>
 		<xs:attribute name="swift-name" type="xs:string" use="optional"/>
 	</xs:complexType>

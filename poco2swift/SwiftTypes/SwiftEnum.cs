@@ -8,6 +8,7 @@ namespace poco2swift.SwiftTypes
 		public SwiftEnum(string name)
 			: base(name)
 		{
+			base.IsValueType = true;
 		}
 
 		#region Values

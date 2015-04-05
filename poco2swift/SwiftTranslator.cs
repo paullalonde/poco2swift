@@ -29,24 +29,24 @@ namespace poco2swift
 			_appDomain = appDomain;
 
 			InitPredefinedMapTypes();
-			CacheMappedTypes();
+			InitExternalTypes();
 		}
 
 		private void InitPredefinedMapTypes()
 		{
-			AddPredefinedMapType(typeof(object), new SwiftClass("Any"));
-			AddPredefinedMapType(typeof(SByte), new SwiftClass("Int8"));
-			AddPredefinedMapType(typeof(Int16), new SwiftClass("Int16"));
-			AddPredefinedMapType(typeof(Int32), new SwiftClass("Int32"));
-			AddPredefinedMapType(typeof(Int64), new SwiftClass("Int64"));
-			AddPredefinedMapType(typeof(Byte), new SwiftClass("UInt8"));
-			AddPredefinedMapType(typeof(UInt16), new SwiftClass("UInt16"));
-			AddPredefinedMapType(typeof(UInt32), new SwiftClass("UInt32"));
-			AddPredefinedMapType(typeof(UInt64), new SwiftClass("UInt64"));
-			AddPredefinedMapType(typeof(string), new SwiftClass("String"));
-			AddPredefinedMapType(typeof(bool), new SwiftClass("Bool"));
-			AddPredefinedMapType(typeof(float), new SwiftClass("Float"));
-			AddPredefinedMapType(typeof(double), new SwiftClass("Double"));
+			AddPredefinedMapType(typeof(object), "Any", valueType: false);
+			AddPredefinedMapType(typeof(SByte), "Int8");
+			AddPredefinedMapType(typeof(Int16), "Int16");
+			AddPredefinedMapType(typeof(Int32), "Int32");
+			AddPredefinedMapType(typeof(Int64), "Int64");
+			AddPredefinedMapType(typeof(Byte), "UInt8");
+			AddPredefinedMapType(typeof(UInt16), "UInt16");
+			AddPredefinedMapType(typeof(UInt32), "UInt32");
+			AddPredefinedMapType(typeof(UInt64), "UInt64");
+			AddPredefinedMapType(typeof(string), "String");
+			AddPredefinedMapType(typeof(bool), "Bool");
+			AddPredefinedMapType(typeof(float), "Float");
+			AddPredefinedMapType(typeof(double), "Double");
 			//AddPredefinedMapType(typeof(Guid),   new SwiftPrimitive(TypeCode.NSUUID));
 			//AddPredefinedMapType(typeof(Uri),    new SwiftPrimitive(TypeCode.NSURL));
 		}
@@ -563,47 +563,54 @@ namespace poco2swift
 			return swiftEnum;
 		}
 
-		private void CacheMappedTypes()
+		private void InitExternalTypes()
 		{
-			if (_configuration.externaltypes != null)
+			if (_configuration.externaltypes == null)
+				return;
+			
+			foreach (var externalType in _configuration.externaltypes)
 			{
-				foreach (var externalType in _configuration.externaltypes)
+				if (String.IsNullOrEmpty(externalType.fullname))
 				{
-					if (String.IsNullOrEmpty(externalType.fullname))
-					{
-						ErrorHandler.Error("Empty 'fullname' in map-type");
-						continue;
-					}
-
-					if (String.IsNullOrEmpty(externalType.swiftname))
-					{
-						ErrorHandler.Error("Empty 'swift-name' in map-type");
-						continue;
-					}
-
-					var type = _appDomain.GetDomainType(externalType.fullname);
-					var swiftType = new SwiftClass(externalType.swiftname) { IsExcluded = true };
-
-					_swiftTypes.Add(type, swiftType);
+					ErrorHandler.Error("Empty 'fullname' in map-type");
+					continue;
 				}
-			}
 
-			// Add predefined map types.
+				if (String.IsNullOrEmpty(externalType.swiftname))
+				{
+					ErrorHandler.Error("Empty 'swift-name' in map-type");
+					continue;
+				}
 
-			foreach (var kvp in _predefinedMapTypes)
-			{
-				if (!_swiftTypes.ContainsKey(kvp.Key))
-					_swiftTypes.Add(kvp.Key, kvp.Value);
+				var type = _appDomain.GetDomainType(externalType.fullname);
+
+				if (!_swiftTypes.ContainsKey(type))
+				{
+					var swiftClass = new SwiftClass(externalType.swiftname)
+					{
+						IsExcluded = true,
+						IsValueType = externalType.isvaluetype,
+					};
+
+					_swiftTypes.Add(type, swiftClass);
+				}
 			}
 		}
 
-		private void AddPredefinedMapType(Type type, SwiftClass swiftClass)
+		private void AddPredefinedMapType(Type type, string swiftName, bool valueType = true)
 		{
-			swiftClass.IsExcluded = true;
-
 			var proxy = _appDomain.GetDomainType(type.AssemblyQualifiedName);
 
-			_predefinedMapTypes.Add(proxy, swiftClass);
+			if (!_swiftTypes.ContainsKey(proxy))
+			{
+				var swiftClass = new SwiftClass(swiftName)
+				{
+					IsExcluded = true,
+					IsValueType = valueType,
+				};
+
+				_swiftTypes.Add(proxy, swiftClass);
+			}
 		}
 
 		private readonly Poco2SwiftType _configuration;
@@ -613,6 +620,5 @@ namespace poco2swift
 		private readonly IDictionary<TypeProxy, SwiftType> _swiftTypes = new Dictionary<TypeProxy, SwiftType>();
 		private readonly IDictionary<string, TypeProxy> _swiftNamesToTypes = new Dictionary<string, TypeProxy>();
 		private readonly IDictionary<TypeProxy, string> _swiftTypesToNames = new Dictionary<TypeProxy, string>();
-		private readonly IDictionary<TypeProxy, SwiftClass> _predefinedMapTypes = new Dictionary<TypeProxy, SwiftClass>();
 	}
 }

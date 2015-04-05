@@ -14,6 +14,8 @@ namespace poco2swift.SwiftTypes
 
 			_keyType = keyType;
 			_valueType = valueType;
+
+			base.IsValueType = true;
 		}
 
 		#region SwiftType overrides

@@ -11,8 +11,8 @@ namespace poco2swift
 {
 	class FileSwiftWriter : SwiftWriter, IDisposable
 	{
-		public FileSwiftWriter(string outputDir, Poco2SwiftType configuration)
-			: base(configuration)
+		public FileSwiftWriter(Poco2SwiftType configuration, bool swift_12, string outputDir)
+			: base(configuration, swift_12)
 		{
 			if (String.IsNullOrEmpty(outputDir))
 				throw new ArgumentNullException("outputDir");
@@ -32,7 +32,6 @@ namespace poco2swift
 				var swiftName = Path.ChangeExtension(assemblyName, ".swift");
 				var swiftPath = Path.Combine(_outputDir, swiftName);
 
-				//writer = new StreamWriter(swiftPath, false, Encoding.UTF8);
 				writer = File.CreateText(swiftPath);
 
 				_writers.Add(assembly, writer);

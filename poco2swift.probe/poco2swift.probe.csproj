@@ -49,6 +49,7 @@
     <Compile Include="IAppDomainProxy.cs" />
     <Compile Include="IProxyCallback.cs" />
     <Compile Include="IProxyUtils.cs" />
+    <Compile Include="ITypeFilter.cs" />
     <Compile Include="MemberProxy.cs" />
     <Compile Include="ProbeExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

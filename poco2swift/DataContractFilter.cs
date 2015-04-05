@@ -55,18 +55,12 @@ namespace poco2swift
 					return contract.Name;
 			}
 
-			if (type.IsGenericType)
-			{
-				var name = type.Name;
-				int backquote = name.IndexOf('`');
+			var tt = ConfigurationForType(type);
 
-				if (backquote >= 0)
-					name = name.Substring(0, backquote);
+			if ((tt != null) && (tt.EffectiveSwiftName != null))
+				return tt.EffectiveSwiftName;
 
-				return name;
-			}
-
-			return type.Name;
+			return TypeType.MakeSwiftSafeName(type.Name);
 		}
 
 		public bool IsGoodProperty(PropertyProxy property)
@@ -358,8 +352,28 @@ namespace poco2swift
 		{
 			var allTypes = _configuration.classes.Cast<TypeType>().Union(_configuration.enumerations);
 
-			_typesByName = allTypes.Where(tt => !String.IsNullOrEmpty(tt.name)).ToDictionary(tt => tt.name);
-			_typesByFullname = allTypes.Where(tt => !String.IsNullOrEmpty(tt.fullname)).ToDictionary(tt => tt.fullname);
+			foreach (var tt in allTypes)
+			{
+				var name = tt.EffectiveName;
+
+				if (!String.IsNullOrEmpty(name))
+				{
+					if (!_typesByName.ContainsKey(name))
+						_typesByName.Add(name, tt);
+					else
+						ErrorHandler.Error("Type '{0}' already configured.", name);
+				}
+
+				var fullName = tt.EffectiveFullName;
+
+				if (!String.IsNullOrEmpty(fullName))
+				{
+					if (!_typesByFullname.ContainsKey(fullName))
+						_typesByFullname.Add(fullName, tt);
+					else
+						ErrorHandler.Error("Type '{0}' already configured.", fullName);
+				}
+			}
 
 			_skipFullnames = new HashSet<string>(from st in _configuration.skiptypes where !String.IsNullOrEmpty(st.fullname) select st.fullname);
 			_skipRegexes = from st in _configuration.skiptypes where !String.IsNullOrEmpty(st.match) select new Regex(st.match, RegexOptions.ECMAScript);
@@ -369,9 +383,9 @@ namespace poco2swift
 		private readonly IDictionary<TypeProxy, DataContractProxy> _typeContracts = new Dictionary<TypeProxy, DataContractProxy>();
 		private readonly IDictionary<PropertyProxy, DataMemberProxy> _propertyContracts = new Dictionary<PropertyProxy, DataMemberProxy>();
 		private readonly IDictionary<EnumValueProxy, EnumMemberProxy> _enumContracts = new Dictionary<EnumValueProxy, EnumMemberProxy>();
+		private readonly IDictionary<string, TypeType> _typesByName = new Dictionary<string, TypeType>();
+		private readonly IDictionary<string, TypeType> _typesByFullname = new Dictionary<string, TypeType>();
 		private ISet<string> _skipFullnames;
 		private IEnumerable<Regex> _skipRegexes;
-		private IDictionary<string, TypeType> _typesByName;
-		private IDictionary<string, TypeType> _typesByFullname;
 	}
 }

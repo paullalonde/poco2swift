@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using poco2swift.probe;
 
-namespace poco2swift
+namespace poco2swift.probe
 {
 	public interface ITypeFilter
 	{

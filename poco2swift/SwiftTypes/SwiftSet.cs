@@ -15,6 +15,8 @@ namespace poco2swift.SwiftTypes
 				throw new ArgumentNullException("elementType");
 
 			_elementType = elementType;
+
+			base.IsValueType = true;
 		}
 
 		#region SwiftType overrides

@@ -6,7 +6,7 @@ namespace poco2swift.tests
 	class NullWriter : SwiftWriter
 	{
 		public NullWriter(Poco2SwiftType configuration)
-			: base(configuration)
+			: base(configuration, true)
 		{
 			_writer = new StringWriter();
 

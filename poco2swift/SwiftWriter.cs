@@ -7,12 +7,13 @@ namespace poco2swift
 {
 	public abstract class SwiftWriter
 	{
-		public SwiftWriter(Poco2SwiftType configuration)
+		public SwiftWriter(Poco2SwiftType configuration, bool swift_12)
 		{
 			if (configuration == null)
 				throw new ArgumentNullException("configuration");
 
 			_configuration = configuration;
+			this.IsEmittingSwift_12 = swift_12;
 		}
 
 		public void Write(TypeProxy type, SwiftType swiftType)
@@ -50,7 +51,7 @@ namespace poco2swift
 		/// <summary>
 		/// Are we emitting Swift 1.2 ?
 		/// </summary>
-		public bool IsEmittingSwift_12 { get { return true; } }
+		public bool IsEmittingSwift_12 { get; set; }
 
 		public void Write(string str)
 		{

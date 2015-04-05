@@ -248,13 +248,15 @@ namespace poco2swift {
         
         private string nameField;
         
-        private bool includeField;
-        
-        private bool includeFieldSpecified;
+        private bool forceincludeField;
         
         private string fullnameField;
         
         private string swiftnameField;
+        
+        public TypeType() {
+            this.forceincludeField = false;
+        }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
@@ -268,24 +270,14 @@ namespace poco2swift {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool include {
+        [System.Xml.Serialization.XmlAttributeAttribute("force-include")]
+        [System.ComponentModel.DefaultValueAttribute(false)]
+        public bool forceinclude {
             get {
-                return this.includeField;
+                return this.forceincludeField;
             }
             set {
-                this.includeField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool includeSpecified {
-            get {
-                return this.includeFieldSpecified;
-            }
-            set {
-                this.includeFieldSpecified = value;
+                this.forceincludeField = value;
             }
         }
         
@@ -368,6 +360,12 @@ namespace poco2swift {
         
         private string swiftnameField;
         
+        private bool isvaluetypeField;
+        
+        public ExternalType() {
+            this.isvaluetypeField = false;
+        }
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute("full-name")]
         public string fullname {
@@ -387,6 +385,18 @@ namespace poco2swift {
             }
             set {
                 this.swiftnameField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute("is-value-type")]
+        [System.ComponentModel.DefaultValueAttribute(false)]
+        public bool isvaluetype {
+            get {
+                return this.isvaluetypeField;
+            }
+            set {
+                this.isvaluetypeField = value;
             }
         }
     }
