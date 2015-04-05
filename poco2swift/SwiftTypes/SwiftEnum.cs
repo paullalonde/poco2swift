@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace poco2swift.SwiftTypes
 {
@@ -25,9 +24,17 @@ namespace poco2swift.SwiftTypes
 
 		#region SwiftComposite overrides
 
-		protected override string SourceDeclaration { get { return "enum"; } }
+		protected override void WriteKeyword(SwiftWriter writer)
+		{
+			writer.Write("enum");
+		}
 
-		protected override void WriteChildren(TextWriter writer)
+		protected override void WriteDeclaration(SwiftWriter writer)
+		{
+			Write(writer);
+		}
+
+		protected override void WriteChildren(SwiftWriter writer)
 		{
 			var firstTime = true;
 			var previousValueHadDoc = false;
@@ -49,6 +56,18 @@ namespace poco2swift.SwiftTypes
 				firstTime = false;
 				previousValueHadDoc = hasDoc;
 			}
+		}
+
+		#endregion
+
+		#region SwiftType overrides
+
+		public override void Write(SwiftWriter writer)
+		{
+			if (writer == null)
+				throw new ArgumentNullException("writer");
+
+			writer.Write(this.Name);
 		}
 
 		#endregion

@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace poco2swift.SwiftTypes
 {
-	public class SwiftArray : SwiftType
+	public class SwiftSet : SwiftType
 	{
-		public SwiftArray(SwiftType elementType)
+		public SwiftSet(SwiftType elementType)
 		{
 			if (elementType == null)
 				throw new ArgumentNullException("elementType");
@@ -19,9 +24,9 @@ namespace poco2swift.SwiftTypes
 			if (writer == null)
 				throw new ArgumentNullException("writer");
 
-			writer.Write("[");
+			writer.Write(writer.IsEmittingSwift_12 ? "Set<" : "[");
 			_elementType.Write(writer);
-			writer.Write("]");
+			writer.Write(writer.IsEmittingSwift_12 ? ">" : "]");
 		}
 
 		#endregion

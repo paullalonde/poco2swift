@@ -31,6 +31,15 @@ namespace poco2swift.probe
 
 		#endregion
 
+		#region MarshalByRefObject overrides
+
+		public override object InitializeLifetimeService()
+		{
+			return null;
+		}
+
+		#endregion
+
 		public DataMemberProxy GetDataContract()
 		{
 			var contract = _property.GetCustomAttribute(typeof(DataMemberAttribute)) as DataMemberAttribute;

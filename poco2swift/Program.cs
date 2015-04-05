@@ -211,20 +211,23 @@ namespace poco2swift
 		{
 			foreach (var type in _types)
 			{
-				_translator.TranslateType(type, forDefinition: true);
+				_translator.TranslateType(type);
 			}
 		}
 
 		private void WriteSwiftSource()
 		{
-			using (var writer = new SwiftWriter(_outputDir, _configuration))
+			using (var writer = new FileSwiftWriter(_outputDir, _configuration))
 			{
 				foreach (var tuple in _translator.GetCachedSwiftTypes())
 				{
 					var swiftType = tuple.Item1;
 					var type = tuple.Item2;
 
-					writer.Write(swiftType, type);
+					if (swiftType.IsExcluded)
+						continue;
+
+					writer.Write(type, swiftType);
 				}
 			}
 		}

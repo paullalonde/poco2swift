@@ -54,6 +54,7 @@
     <Compile Include="NullProxyCallback.cs" />
     <Compile Include="NullProxyUtils.cs" />
     <Compile Include="NullTypeFilter.cs" />
+    <Compile Include="NullWriter.cs" />
     <Compile Include="TranslatorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

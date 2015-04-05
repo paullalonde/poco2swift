@@ -15,6 +15,11 @@ namespace poco2swift.tests
 			get { return new TypeProxy(this.Utils, typeof(object)); }
 		}
 
+		public TypeProxy ValueType
+		{
+			get { return new TypeProxy(this.Utils, typeof(ValueType)); }
+		}
+
 		public TypeProxy GetDomainType(string typeName)
 		{
 			var type = Type.GetType(typeName);
@@ -33,6 +38,11 @@ namespace poco2swift.tests
 		public TypeProxy MakeGenericEnumerableType(TypeProxy elementTypeProxy)
 		{
 			return MakeGenericType(typeof(IEnumerable<>), elementTypeProxy);
+		}
+
+		public TypeProxy MakeGenericSetType(TypeProxy elementTypeProxy)
+		{
+			return MakeGenericType(typeof(ISet<>), elementTypeProxy);
 		}
 
 		public TypeProxy MakeGenericDictionaryType(TypeProxy keyTypeProxy, TypeProxy valueTypeProxy)

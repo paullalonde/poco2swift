@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 namespace poco2swift.SwiftTypes
 {
@@ -23,7 +22,7 @@ namespace poco2swift.SwiftTypes
 		public SwiftType Type { get; private set; }
 		public string BriefComment { get; set; }
 
-		public void WriteDeclaration(TextWriter writer)
+		public void WriteDeclaration(SwiftWriter writer)
 		{
 			if (writer == null)
 				throw new ArgumentNullException("writer");

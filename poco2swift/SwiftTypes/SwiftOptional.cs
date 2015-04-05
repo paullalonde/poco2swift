@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 namespace poco2swift.SwiftTypes
 {
@@ -21,7 +20,7 @@ namespace poco2swift.SwiftTypes
 
 		public override bool IsOptional { get { return true; } }
 
-		public override void Write(TextWriter writer)
+		public override void Write(SwiftWriter writer)
 		{
 			if (writer == null)
 				throw new ArgumentNullException("writer");

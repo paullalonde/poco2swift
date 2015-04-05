@@ -49,6 +49,7 @@
     <Compile Include="DataContractFilter.cs" />
     <Compile Include="DocumentationCache.cs" />
     <Compile Include="ErrorHandler.cs" />
+    <Compile Include="FileSwiftWriter.cs" />
     <Compile Include="Poco2SwiftType.custom.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -62,7 +63,7 @@
     <Compile Include="SwiftTypes\SwiftOptional.cs" />
     <Compile Include="SwiftTypes\SwiftPlaceholder.cs" />
     <Compile Include="SwiftTypes\SwiftProperty.cs" />
-    <Compile Include="SwiftTypes\SwiftReference.cs" />
+    <Compile Include="SwiftTypes\SwiftSet.cs" />
     <Compile Include="SwiftTypes\SwiftType.cs" />
     <Compile Include="SwiftTypes\SwiftClass.cs" />
     <Compile Include="SwiftTypes\SwiftDictionary.cs" />

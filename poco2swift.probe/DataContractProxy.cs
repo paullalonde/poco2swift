@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace poco2swift.probe
 {
@@ -11,5 +7,14 @@ namespace poco2swift.probe
 		public bool IsReference { get; set; }
 		public string Name { get; set; }
 		public string Namespace { get; set; }
+
+		#region MarshalByRefObject overrides
+
+		public override object InitializeLifetimeService()
+		{
+			return null;
+		}
+
+		#endregion
 	}
 }

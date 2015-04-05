@@ -53,8 +53,23 @@ namespace poco2swift
 
 		public void CacheSwiftName(TypeProxy type, string swiftName)
 		{
-			_swiftNamesToTypes.Add(swiftName, type);
-			_swiftTypesToNames.Add(type, swiftName);
+			if (type == null)
+				throw new ArgumentNullException("type");
+
+			if (String.IsNullOrEmpty(swiftName))
+				throw new ArgumentNullException("swiftName");
+
+			TypeProxy foundType;
+
+			if (!_swiftNamesToTypes.TryGetValue(swiftName, out foundType))
+			{
+				_swiftNamesToTypes.Add(swiftName, type);
+				_swiftTypesToNames.Add(type, swiftName);
+			}
+			else if (foundType != type)
+			{
+				ErrorHandler.Error("Swift type '{0}' has multiple source types.", swiftName);
+			}
 		}
 
 		public IEnumerable<Tuple<SwiftType, TypeProxy>> GetCachedSwiftTypes()
@@ -75,7 +90,7 @@ namespace poco2swift
 			return swiftTypes;
 		}
 
-		public SwiftType TranslateType(TypeProxy type, bool forDefinition = false)
+		public SwiftType TranslateType(TypeProxy type)
 		{
 			if (type == null)
 				throw new ArgumentNullException("type");
@@ -105,7 +120,7 @@ namespace poco2swift
 			}
 			else if (type.IsClass || type.IsValueType)
 			{
-				swiftType = TranslateClass(type, forDefinition);
+				swiftType = TranslateClass(type);
 			}
 			else
 			{
@@ -150,7 +165,7 @@ namespace poco2swift
 
 		//}
 
-		private SwiftType TranslateClass(TypeProxy classType, bool forDefinition)
+		private SwiftType TranslateClass(TypeProxy classType)
 		{
 			//Console.Out.WriteLine("Translating class {0}", classType.FullName);
 
@@ -189,10 +204,67 @@ namespace poco2swift
 
 			_swiftTypes.Add(classType, swiftClass);
 
-			var baseType = classType.BaseType;
+			var baseType = (classType.BaseType != _appDomain.ObjectType) ? classType.BaseType : null;
 
-			if (baseType != _appDomain.ObjectType)
+			if (baseType != null)
 			{
+				if (!classType.IsGenericType && baseType.IsGenericType)
+				{
+					// The class is not generic, but its base class is.
+					// This isn't a valid Swift construct, so we need to convert it.
+					// 
+					// Given these C# classes :
+					//		class Base<T> {}
+					//		class Derived : Base<int> {}
+					//
+					// We need to generate these Swift classes :
+					//		class Base<T> {}
+
+					var baseArgs = baseType.GetGenericArguments();
+					var templateType = baseType.GetGenericTypeDefinition();
+					var templateArgs = templateType.GetGenericArguments();
+
+					for (int i = 0; i < baseArgs.Count; ++i)
+					{
+						var baseArg = baseArgs[i];
+						var templateArg = templateArgs[i];
+						string parameterName;
+
+						if (baseArg.IsGenericParameter)
+							parameterName = baseArg.Name;
+						else
+							parameterName = templateArg.Name;
+
+						var swiftBaseArg = TranslateType(baseArg);
+
+						if (swiftBaseArg == null)
+						{
+							ErrorHandler.Error("Skipping generic parameter of class '{0}' because of undefined type '{1}'.", baseType.Name, baseArg.FullName);
+
+							return null;
+						}
+
+						var swiftTemplateArg = TranslateType(templateArg);
+
+						if (swiftTemplateArg == null)
+						{
+							ErrorHandler.Error("Skipping generic parameter of class '{0}' because of undefined type '{1}'.", templateType.Name, templateArg.FullName);
+
+							return null;
+						}
+
+						swiftClass.AddTypeParameter(parameterName, swiftTemplateArg);
+						swiftClass.AddTypeParameterContraint(parameterName, swiftBaseArg);
+					}
+
+					baseType = templateType;
+				}
+
+				//var generic = classType.IsGenericType;
+				//var genericTypeDef = classType.IsGenericTypeDefinition;
+				//var base_eneric = baseType.IsGenericType;
+				//var base_genericTypeDef = baseType.IsGenericTypeDefinition;
+
 				var baseSwiftType = TranslateType(baseType);
 
 				if (baseSwiftType == null)
@@ -214,22 +286,57 @@ namespace poco2swift
 						if (typeArg.IsGenericParameter)
 						{
 							swiftClass.AddTypeParameter(new SwiftPlaceholder(typeArg.Name));
+
+							foreach (var constraintType in typeArg.GetGenericParameterConstraints())
+							{
+								if (!constraintType.IsClass)
+									continue;
+
+								// A constraint on 'struct' is expressed as a constraint on System.ValueType.
+
+								if (constraintType == _appDomain.ValueType)
+									continue;
+
+								var constraintSwiftClass = TranslateType(constraintType);
+
+								swiftClass.AddTypeParameterContraint(typeArg.Name, constraintSwiftClass);
+
+								break;
+							}
 						}
 						else
 						{
 							throw new InvalidOperationException();
 						}
+					}
+				}
+				else
+				{
+					var templateType = classType.GetGenericTypeDefinition();
+					var templateArgs = templateType.GetGenericArguments();
+					var classArgs = classType.GetGenericArguments();
 
-						//var swiftTypeArg = TranslateType(typeArg);
+					for (int i = 0; i < classArgs.Count; ++i)
+					{
+						var classArg = classArgs[i];
+						var templateArg = templateArgs[i];
+						string parameterName;
 
-						//if (swiftTypeArg == null)
-						//{
-						//	ErrorHandler.Error("Skipping generic parameter of class '{0}' because of undefined type '{1}'.", classType.Name, typeArg.FullName);
+						if (classArg.IsGenericParameter)
+							parameterName = classArg.Name;
+						else
+							parameterName = templateArg.Name;
 
-						//	continue;
-						//}
+						var swiftClassArg = TranslateType(classArg);
 
-						//swiftClass.AddTypeParameter(typeArg.Name, swiftTypeArg);
+						if (swiftClassArg == null)
+						{
+							ErrorHandler.Error("Skipping generic parameter of class '{0}' because of undefined type '{1}'.", classType.Name, classArg.FullName);
+
+							continue;
+						}
+
+						swiftClass.AddTypeParameter(parameterName, swiftClassArg);
 					}
 				}
 
@@ -293,6 +400,10 @@ namespace poco2swift
 					{
 						return TranslateNullable(classType, innerType);
 					}
+					else if (_appDomain.MakeGenericSetType(innerType).IsAssignableFrom(classType))
+					{
+						return TranslateSet(classType, innerType);
+					}
 					else if (_appDomain.MakeGenericEnumerableType(innerType).IsAssignableFrom(classType))
 					{
 						return TranslateList(classType, innerType);
@@ -340,6 +451,22 @@ namespace poco2swift
 				return null;
 
 			var swiftType = new SwiftArray(elementSwiftType);
+
+			_swiftTypes.Add(collectionType, swiftType);
+
+			return swiftType;
+		}
+
+		private SwiftType TranslateSet(TypeProxy collectionType, TypeProxy elementType)
+		{
+			// ISet<T> gets translated into Set<T>
+
+			var elementSwiftType = TranslateType(elementType);
+
+			if (elementSwiftType == null)
+				return null;
+
+			var swiftType = new SwiftSet(elementSwiftType);
 
 			_swiftTypes.Add(collectionType, swiftType);
 
@@ -455,7 +582,7 @@ namespace poco2swift
 					}
 
 					var type = _appDomain.GetDomainType(externalType.fullname);
-					var swiftType = new SwiftClass(externalType.swiftname);
+					var swiftType = new SwiftClass(externalType.swiftname) { IsExcluded = true };
 
 					_swiftTypes.Add(type, swiftType);
 				}
@@ -472,6 +599,8 @@ namespace poco2swift
 
 		private void AddPredefinedMapType(Type type, SwiftClass swiftClass)
 		{
+			swiftClass.IsExcluded = true;
+
 			var proxy = _appDomain.GetDomainType(type.AssemblyQualifiedName);
 
 			_predefinedMapTypes.Add(proxy, swiftClass);

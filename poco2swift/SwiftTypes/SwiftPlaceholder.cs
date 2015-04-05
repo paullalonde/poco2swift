@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 namespace poco2swift.SwiftTypes
 {
@@ -17,7 +16,7 @@ namespace poco2swift.SwiftTypes
 
 		#region SwiftType overrides
 
-		public override void Write(TextWriter writer)
+		public override void Write(SwiftWriter writer)
 		{
 			if (writer == null)
 				throw new ArgumentNullException("writer");

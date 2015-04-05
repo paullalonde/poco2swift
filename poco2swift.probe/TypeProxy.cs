@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace poco2swift.probe
 {
-	public class TypeProxy : MarshalByRefObject //, IEquatable<TypeProxy>
+	public class TypeProxy : MarshalByRefObject
 	{
 		public TypeProxy(IProxyUtils utils, Type type)
 		{
@@ -52,6 +52,11 @@ namespace poco2swift.probe
 			return (from argType in _type.GetGenericArguments() select MakeTypeProxy(argType)).ToList();
 		}
 
+		public IList<TypeProxy> GetGenericParameterConstraints()
+		{
+			return (from constraintType in _type.GetGenericParameterConstraints() select MakeTypeProxy(constraintType)).ToList();
+		}
+
 		public IList<PropertyProxy> GetProperties(BindingFlags bindingFlags)
 		{
 			return (from propType in _type.GetProperties(bindingFlags) select new PropertyProxy(_utils, propType)).ToList();
@@ -88,6 +93,15 @@ namespace poco2swift.probe
 				throw new InvalidOperationException("Type not a Enum.");
 
 			return (from val in Enum.GetValues(_type).Cast<Enum>() select new EnumValueProxy(_utils, val)).ToList();
+		}
+
+		#endregion
+
+		#region MarshalByRefObject overrides
+
+		public override object InitializeLifetimeService()
+		{
+			return null;
 		}
 
 		#endregion

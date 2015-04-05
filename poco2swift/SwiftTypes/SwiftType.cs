@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-using System.IO;
-using System.Text;
+﻿using System;
 
 namespace poco2swift.SwiftTypes
 {
@@ -8,21 +6,8 @@ namespace poco2swift.SwiftTypes
 	{
 		public virtual bool IsOptional { get { return false; } }
 
-		public abstract void Write(TextWriter writer);
+		public bool IsExcluded { get; set; }
 
-		public string Declaration
-		{
-			get
-			{
-				using (var writer = new StringWriter(CultureInfo.InvariantCulture))
-				{
-					Write(writer);
-
-					writer.Flush();
-
-					return writer.ToString();
-				}
-			}
-		}
+		public abstract void Write(SwiftWriter writer);
 	}
 }

@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace poco2swift.SwiftTypes
 {
@@ -23,7 +18,7 @@ namespace poco2swift.SwiftTypes
 
 		public string BriefComment { get; set; }
 
-		public void WriteDeclaration(TextWriter writer)
+		public void WriteDeclaration(SwiftWriter writer)
 		{
 			if (writer == null)
 				throw new ArgumentNullException("writer");

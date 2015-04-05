@@ -70,6 +70,15 @@ namespace poco2swift.probe
 			return _utils.MakeTypeProxy(type);
 		}
 
+		#region MarshalByRefObject overrides
+
+		public override object InitializeLifetimeService()
+		{
+			return null;
+		}
+
+		#endregion
+
 		private readonly IProxyUtils _utils;
 		private readonly Enum _value;
 	}

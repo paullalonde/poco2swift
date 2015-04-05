@@ -19,18 +19,19 @@ namespace poco2swift.SwiftTypes
 		public string BriefComment { get; set; }
 		public SwiftType BaseType { get; set; }
 
-		protected abstract string SourceDeclaration { get; }
+		protected abstract void WriteKeyword(SwiftWriter writer);
+		protected abstract void WriteDeclaration(SwiftWriter writer);
+		protected abstract void WriteChildren(SwiftWriter writer);
 
-		protected abstract void WriteChildren(TextWriter writer);
-
-		public void WriteDeclaration(TextWriter writer)
+		public void WriteDefinition(SwiftWriter writer)
 		{
 			if (writer == null)
 				throw new ArgumentNullException("writer");
 
 			WriteComment(0, writer, this.BriefComment);
-			writer.Write("{0} ", this.SourceDeclaration);
-			this.Write(writer);
+			WriteKeyword(writer);
+			writer.Write(" ");
+			WriteDeclaration(writer);
 
 			if (this.BaseType != null)
 			{
@@ -43,7 +44,16 @@ namespace poco2swift.SwiftTypes
 			writer.WriteLine("}");
 		}
 
-		internal static bool WriteComment(int indent, TextWriter writer, string comment)
+		#region Object overrides
+
+		public override string ToString()
+		{
+			return this.Name;
+		}
+
+		#endregion
+
+		internal static bool WriteComment(int indent, SwiftWriter writer, string comment)
 		{
 			bool wroteComment = false;
 
@@ -60,100 +70,5 @@ namespace poco2swift.SwiftTypes
 
 			return wroteComment;
 		}
-
-		#region Type parameters
-
-		public IEnumerable<SwiftPlaceholder> TypeParameters
-		{
-			get { return _orderedParameters; }
-		}
-
-		public bool ContainsTypeParameter(SwiftPlaceholder parameter)
-		{
-			if (parameter == null)
-				throw new ArgumentNullException("parameter");
-
-			return _parameters.Contains(parameter);
-		}
-
-		public void AddTypeParameter(SwiftPlaceholder parameter)
-		{
-			if (parameter == null)
-				throw new ArgumentNullException("parameter");
-
-			if (_parameters.Contains(parameter))
-				throw new ArgumentException(String.Format("Duplicate parameter : {0}.", parameter.Name));
-
-			_parameters.Add(parameter);
-			_orderedParameters.Add(parameter);
-		}
-
-		public void AddTypeParameterContraint(SwiftPlaceholder parameter, SwiftType constraint)
-		{
-			if (parameter == null)
-				throw new ArgumentNullException("parameter");
-
-			if (constraint == null)
-				throw new ArgumentNullException("constraint");
-
-			if (!_parameters.Contains(parameter))
-				throw new ArgumentException(String.Format("Unknown parameter : {0}.", parameter.Name));
-
-			_parameterContraints.Add(parameter, constraint);
-		}
-
-		public SwiftType GetTypeParameterConstraint(SwiftPlaceholder parameter)
-		{
-			if (parameter == null)
-				throw new ArgumentNullException("parameter");
-
-			SwiftType constraint;
-
-			if (!_parameterContraints.TryGetValue(parameter, out constraint))
-				constraint = null;
-
-			return constraint;
-		}
-
-		#endregion
-
-		#region SwiftType overrides
-
-		public override void Write(TextWriter writer)
-		{
-			if (writer == null)
-				throw new ArgumentNullException("writer");
-
-			writer.Write(this.Name);
-
-			if (_orderedParameters.Any())
-			{
-				var separator = "";
-
-				writer.Write("<");
-
-				foreach (var parameter in _orderedParameters)
-				{
-					writer.Write(separator);
-					writer.Write(parameter.Name);
-
-					SwiftType constraint;
-
-					if (_parameterContraints.TryGetValue(parameter, out constraint))
-					{
-						writer.Write(": ");
-						constraint.Write(writer);
-					}
-				}
-
-				writer.Write(">");
-			}
-		}
-
-		#endregion
-
-		private ISet<SwiftPlaceholder> _parameters = new HashSet<SwiftPlaceholder>();
-		private IList<SwiftPlaceholder> _orderedParameters = new List<SwiftPlaceholder>();
-		private IDictionary<SwiftPlaceholder, SwiftType> _parameterContraints = new Dictionary<SwiftPlaceholder, SwiftType>();
 	}
 }

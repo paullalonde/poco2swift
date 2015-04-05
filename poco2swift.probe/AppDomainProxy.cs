@@ -31,6 +31,11 @@ namespace poco2swift.probe
 			get { return MakeTypeProxy(typeof(object)); }
 		}
 
+		public TypeProxy ValueType
+		{
+			get { return MakeTypeProxy(typeof(ValueType)); }
+		}
+
 		public TypeProxy GetDomainType(string typeName)
 		{
 			if (String.IsNullOrEmpty(typeName))
@@ -58,9 +63,23 @@ namespace poco2swift.probe
 			return MakeGenericType(typeof(IEnumerable<>), elementTypeProxy);
 		}
 
+		public TypeProxy MakeGenericSetType(TypeProxy elementTypeProxy)
+		{
+			return MakeGenericType(typeof(ISet<>), elementTypeProxy);
+		}
+
 		public TypeProxy MakeGenericDictionaryType(TypeProxy keyTypeProxy, TypeProxy valueTypeProxy)
 		{
 			return MakeGenericType(typeof(IDictionary<,>), keyTypeProxy, valueTypeProxy);
+		}
+
+		#endregion
+
+		#region MarshalByRefObject overrides
+
+		public override object InitializeLifetimeService()
+		{
+			return null;
 		}
 
 		#endregion

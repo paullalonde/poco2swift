@@ -24,6 +24,15 @@ namespace poco2swift.probe
 
 		#endregion
 
+		#region MarshalByRefObject overrides
+
+		public override object InitializeLifetimeService()
+		{
+			return null;
+		}
+
+		#endregion
+
 		private TypeProxy MakeTypeProxy(Type type)
 		{
 			return _utils.MakeTypeProxy(type);
