@@ -29,11 +29,6 @@ namespace poco2swift.SwiftTypes
 			writer.Write("enum");
 		}
 
-		protected override void WriteDeclaration(SwiftWriter writer)
-		{
-			Write(writer);
-		}
-
 		protected override void WriteChildren(SwiftWriter writer)
 		{
 			var firstTime = true;
@@ -56,18 +51,6 @@ namespace poco2swift.SwiftTypes
 				firstTime = false;
 				previousValueHadDoc = hasDoc;
 			}
-		}
-
-		#endregion
-
-		#region SwiftType overrides
-
-		public override void Write(SwiftWriter writer)
-		{
-			if (writer == null)
-				throw new ArgumentNullException("writer");
-
-			writer.Write(this.Name);
 		}
 
 		#endregion
